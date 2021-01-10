@@ -3,10 +3,11 @@
 
 import logging
 import sys
-from . import hq, DingRobot
 import time
 import sqlite3
 from datetime import datetime, timedelta
+from .dingtalk import DingRobot
+from . import hq
 
 LOGGER = logging.getLogger(__name__)
 

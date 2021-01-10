@@ -1,7 +1,7 @@
 import unittest
 import logging
 import sys
-from stock import PriceMon
+from stockpi import PriceMon
 
 
 LOGGER = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import unittest
 import logging
 import sys
-from stock import DingRobot
+from stockpi import DingRobot
 
 
 LOGGER = logging.getLogger(__name__)
