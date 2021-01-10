@@ -13,4 +13,5 @@ def main():
     pricemon.mon()
 
 if __name__ == "__main__":
+    init_logging()
     main()
