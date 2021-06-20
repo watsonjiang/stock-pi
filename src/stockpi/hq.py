@@ -9,6 +9,8 @@ LOGGER = logging.getLogger(__name__)
 
 TYPE_STOCK_PRICE_INFO = namedtuple('StockPrice', ['stock_no', 'name', 'price', 'update_time'])
 
+REQ_TIMEOUT_IN_SEC = 3
+
 STOCK_NO_PATTEN = re.compile(r'.*hq_str_([a-z0-9]+).*')
 def match_stock_no(line):
     m = STOCK_NO_PATTEN.match(line)
@@ -63,7 +65,7 @@ def get_price(stock_list):
         LOGGER.error('stock list is empty!')
         return []
     url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
-    r = requests.get(url)
+    r = requests.get(url, timeout=REQ_TIMEOUT_IN_SEC)
     if not r.ok:
         LOGGER.warning("request failed. code:%s body:%s", r.status_code, r.text)
         return []
