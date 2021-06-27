@@ -3,72 +3,155 @@ import logging
 import requests
 import re
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
+import abc
+import time
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql.expression import delete
+from . import model
 
 LOGGER = logging.getLogger(__name__)
 
+#价格信息结构
 TYPE_STOCK_PRICE_INFO = namedtuple('StockPrice', ['stock_no', 'name', 'price', 'update_time'])
 
 REQ_TIMEOUT_IN_SEC = 3
 
 STOCK_NO_PATTEN = re.compile(r'.*hq_str_([a-z0-9]+).*')
-def match_stock_no(line):
-    m = STOCK_NO_PATTEN.match(line)
-    if m:
-        return m.group(1)
 
-STOCK_HQ_INFO_PATTEN = re.compile(r'.*"(.*)";$')
-def match_stock_hq_info(line):
-    m = STOCK_HQ_INFO_PATTEN.match(line)
-    if m:
-        hq_str = m.group(1)
-        return hq_str.split(',')
+def init(db_engine, stock_list):
+    return SinaHq(db_engine, stock_list)
 
-def get_update_time(stock_hq_info):
-    date = stock_hq_info[30]
-    time = stock_hq_info[31]
-    return datetime.strptime('{} {}'.format(date, time), '%Y-%m-%d %H:%M:%S')
-
-def parse_price(sina_price_text):
+class IHq(abc.ABC):
+    '''行情信息获取基类
     '''
-    解析sina的响应数据
+    @abc.abstractmethod
+    def update_hq(self):
+        '''更新行情
+        '''
+        raise NotImplementedError
+
+class SinaHq(IHq):
+    STOCK_HQ_INFO_PATTEN = re.compile(r'.*"(.*)";$')
+    '''新浪行情获取实现
     '''
-    rst = {}
-    lines = sina_price_text.split('\n')
-    # line by line
-    for line in lines:
-        line = line.strip('\n')
-        if not line:
-            # empty line
-            continue
-        # match stockNo
-        stock_no = match_stock_no(line)
-        # match detail
-        stock_hq_info = match_stock_hq_info(line)
-        if not stock_no or not stock_hq_info:
-            LOGGER.warning('parse failed. line:%s', line)
-            continue
+    def __init__(self, db_engine, stock_list, hq_update_interval_in_sec = 10):
+        self.stock_list = stock_list
+        self.db_engine = db_engine
+        self.session_maker = sessionmaker(bind=db_engine)
+        self._last_update_hq_time = time.time()
+        self._hq_update_interval_in_sec = hq_update_interval_in_sec
+
+    def should_update_hq(self):
+        '''是否更新行情
+        '''
+        now = time.time()
+        if now - self._last_update_hq_time > self._hq_update_interval_in_sec:
+            self._last_update_hq_time = now
+            return True 
+        return False
+
+    def do_update(self):
+        ''' 获取股票价格，存入存储
+        '''
+        with self.session_maker.begin() as session:  
+            hq_list = self.get_price(self.stock_list)
+            for stock_no in hq_list.keys():
+                hq_info = hq_list[stock_no]
+                self.update_company_info(session, hq_info) 
+                self.update_price_info(session, hq_info)
+            self.reclaim_resource(session)
+
+    def update_hq(self):
+        ''' 检查是否需要更新，如果是，更新数据库
+        '''
+        if self.should_update_hq():
+            self.do_update()
+
+    def update_company_info(self, db_session, hq_info):
+        '''更新公司信息
+        '''
+        company_info = db_session.query(model.CompanyInfo).filter(model.CompanyInfo.stock_no == hq_info.stock_no).one_or_none()
+        if company_info:
+            company_info.name = hq_info.name
+        else: 
+            company_info = model.CompanyInfo()
+            company_info.stock_no = hq_info.stock_no
+            company_info.name = hq_info.name
+            db_session.add(company_info)
+
+    def update_price_info(self, db_session, hq_info):
+        '''更新价格信息
+        '''
+        hq_hist = model.HqHistory()
+        hq_hist.stock_no = hq_info.stock_no
+        hq_hist.price = hq_info.price
+        db_session.add(hq_hist)
+
+    def reclaim_resource(self, db_session):
+        '''回收过期资源
+        '''
+        #删除过期行情历史
+        expire_time = datetime.utcnow() - timedelta(hours=24)
+        del_stat = delete(model.HqHistory).where(model.HqHistory.create_time < expire_time)
+        db_session.execute(del_stat) 
+
+    def match_stock_no(self, line):
+        m = STOCK_NO_PATTEN.match(line)
+        if m:
+            return m.group(1)
+
+    def match_stock_hq_info(self, line):
+        m = SinaHq.STOCK_HQ_INFO_PATTEN.match(line)
+        if m:
+            hq_str = m.group(1)
+            return hq_str.split(',')
+
+    def get_update_time(self, stock_hq_info):
+        date = stock_hq_info[30]
+        time = stock_hq_info[31]
+        return datetime.strptime('{} {}'.format(date, time), '%Y-%m-%d %H:%M:%S')
+
+    def parse_price(self, sina_price_text):
+        '''
+        解析sina的响应数据
+        '''
+        rst = {}
+        lines = sina_price_text.split('\n')
+        # line by line
+        for line in lines:
+            line = line.strip('\n')
+            if not line:
+                # empty line
+                continue
+            # match stockNo
+            stock_no = self.match_stock_no(line)
+            # match detail
+            stock_hq_info = self.match_stock_hq_info(line)
+            if not stock_no or not stock_hq_info:
+                LOGGER.warning('parse failed. line:%s', line)
+                continue
+                
+            rst[stock_no] = TYPE_STOCK_PRICE_INFO(stock_no,
+                stock_hq_info[0],
+                stock_hq_info[3], 
+                self.get_update_time(stock_hq_info))
             
-        rst[stock_no] = TYPE_STOCK_PRICE_INFO(stock_no,
-            stock_hq_info[0],
-            stock_hq_info[3], 
-            get_update_time(stock_hq_info))
-        
-    return rst
+        return rst
 
-def get_price(stock_list):
-    '''
-    调用新浪股票行情接口，返回股票价格信息.
-    @return
-    '''
-    if not stock_list:
-        LOGGER.error('stock list is empty!')
-        return []
-    url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
-    r = requests.get(url, timeout=REQ_TIMEOUT_IN_SEC)
-    if not r.ok:
-        LOGGER.warning("request failed. code:%s body:%s", r.status_code, r.text)
-        return []
-    LOGGER.debug('request succeed. url:%s body:%s', url, r.text)
-    return parse_price(r.text)
+    def get_price(self, stock_list):
+        '''
+        调用新浪股票行情接口，返回股票价格信息.
+        @return
+        '''
+        if not stock_list:
+            LOGGER.error('stock list is empty!')
+            return []
+        url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
+        r = requests.get(url, timeout=REQ_TIMEOUT_IN_SEC)
+        if not r.ok:
+            LOGGER.warning("request failed. code:%s body:%s", r.status_code, r.text)
+            return []
+        LOGGER.debug('request succeed. url:%s body:%s', url, r.text)
+        return self.parse_price(r.text)
 

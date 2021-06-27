@@ -6,7 +6,7 @@ from stockpi import DingRobot
 
 LOGGER = logging.getLogger(__name__)
 
-class ItDingRobot(unittest.TestCase):
+class ItDingTalkNotify(unittest.TestCase):
 
     def setUp(self):
         logging.basicConfig(stream=sys.stdout,

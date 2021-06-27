@@ -9,7 +9,7 @@ def init_logging():
                 format="%(asctime)s %(levelname)-8s %(message)s")
 
 def main():
-    pricemon = PriceMon(STOCK_LIST)
+    pricemon = PriceMon(STOCK_LIST, 'sqlite:///stock_db.sqlite3')
     pricemon.mon()
 
 if __name__ == "__main__":
