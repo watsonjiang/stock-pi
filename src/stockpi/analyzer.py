@@ -70,7 +70,9 @@ class PriceRushAnalyzer(IAnalyzer):
     def notice_rush(self, stock_no, min_price, max_price):
         with sessionmaker(self.db_engine)() as session:
             company_info = session.query(CompanyInfo).filter(CompanyInfo.stock_no == stock_no).one_or_none()
-            msg = f'{company_info.name}({stock_no}) 过去{self.time_win_in_sec}秒价格变动超过{self.max_rush_in_percent}. min:{min_price} max:{max_price}'
+            now = datetime.now()
+            rush_val = (max_price - min_price) / min_price * 100
+            msg = f'{now} {company_info.name}({stock_no}) 过去{self.time_win_in_sec}秒价格变动超过{self.max_rush_in_percent}%. rush:{rush_val} min:{min_price} max:{max_price}'
             self.messenger.send_msg(msg)
 
     def do_analyze(self, stock_no):
