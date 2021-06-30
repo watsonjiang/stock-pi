@@ -22,9 +22,10 @@ class ItPriceRushAnalyzer(unittest.TestCase):
                             format="%(asctime)s %(levelname)-8s %(message)s")
         creator = lambda: sqlite3.connect('file::memory:?cache=shared', uri=True)
         self.db_engine = create_engine('sqlite://', creator=creator, echo=True)
+        #self.db_engine = create_engine('sqlite:///stock_db.sqlite3')
         model.create_all_tables(self.db_engine)
-        messenger = notify.init()
-        self.an = analyzer.PriceRushAnalyzer(self.db_engine, messenger, ['sh600580'], 300, 3)
+        messenger = notify.DummyMessenger()
+        self.an = analyzer.PriceRushAnalyzer(self.db_engine, messenger, ['sh600580', 'sz000568'], 300, 3)
 
     def test_analyze(self):
         '''测试有异动'''

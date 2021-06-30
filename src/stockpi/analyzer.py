@@ -77,8 +77,11 @@ class PriceRushAnalyzer(IAnalyzer):
         st = select(HqHistory).where(HqHistory.stock_no == stock_no)
         df = pd.read_sql_query(st, self.db_engine, parse_dates=['create_time', 'update_time'])
         df = df.set_index('create_time')
-        start_time = datetime.utcnow() - timedelta(seconds=self.time_win_in_sec)
-        win = df['price'].between_time(start_time.time(), datetime.utcnow().time())
+        now = datetime.utcnow()
+        start_time = now - timedelta(seconds=self.time_win_in_sec)
+        win = df['price'][start_time:now]
+        LOGGER.info('-----start_time:%s  now:%s', start_time, datetime.utcnow())
+        LOGGER.info('----win %s', win)
         if win.count() > 0:
             min_price = win.min()
             max_price = win.max()

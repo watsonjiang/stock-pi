@@ -25,6 +25,14 @@ class IMessenger(abc.ABC):
        '''
        raise NotImplementedError
 
+class DummyMessenger(IMessenger):
+    '''测试用消息发送
+    '''
+    def send_msg(self, msg):
+        '''发送消息
+        '''
+        LOGGER.info('send msg %s', msg)
+
 class DingTalkRobot(IMessenger):
     '''钉钉机器人消息
     '''
