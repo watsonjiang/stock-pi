@@ -82,8 +82,8 @@ class PriceRushAnalyzer(IAnalyzer):
         now = datetime.utcnow()
         start_time = now - timedelta(seconds=self.time_win_in_sec)
         win = df['price'][start_time:now]
-        LOGGER.info('-----start_time:%s  now:%s', start_time, datetime.utcnow())
-        LOGGER.info('----win %s', win)
+        #LOGGER.info('-----start_time:%s  now:%s', start_time, datetime.utcnow())
+        #LOGGER.info('----win %s', win)
         if win.count() > 0:
             min_price = win.min()
             max_price = win.max()

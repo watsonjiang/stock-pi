@@ -6,6 +6,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 import abc
 import time
+import json
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import delete
 from . import model
@@ -124,7 +125,7 @@ class SinaHq(IHq):
             if not line:
                 # empty line
                 continue
-            # match stockNo
+            # match stockNojson
             stock_no = self.match_stock_no(line)
             # match detail
             stock_hq_info = self.match_stock_hq_info(line)
@@ -136,7 +137,7 @@ class SinaHq(IHq):
                 stock_hq_info[0],
                 stock_hq_info[3], 
                 self.get_update_time(stock_hq_info))
-            
+            LOGGER.info('got price info %s - %s', stock_no, rst[stock_no]) 
         return rst
 
     def get_price(self, stock_list):

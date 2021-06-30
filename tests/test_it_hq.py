@@ -23,6 +23,9 @@ class ItSinaHq(unittest.TestCase):
         model.create_all_tables(self.db_engine)
         self.sina_hq = hq.SinaHq(self.db_engine, ['sh600580'])
 
+    def test_get_price(self):
+        LOGGER.info('price info %s', self.sina_hq.get_price(['sh600580']))
+
     def test_should_update_hq(self):
         '''测试信息拉取间隔, 10秒一次'''
         i = 0
