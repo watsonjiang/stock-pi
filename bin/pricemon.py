@@ -31,7 +31,7 @@ class Launcher(Daemon):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('cmd', help='start|stop|restart|run')
+    parser.add_argument('cmd', help='start|stop|restart|run', choices=['start', 'stop', 'restart', 'run'])
     args = parser.parse_args()
     if args.cmd == 'start':
         init_logging_file()
