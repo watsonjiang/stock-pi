@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import logging, sys
 from logging.handlers import TimedRotatingFileHandler
-from stockpi import PriceMon, Daemon
 import argparse
-
+sys.path.append('../src')
+from stockpi import PriceMon, Daemon
 STOCK_LIST = ['sh600580', 'sh600316', 'sz002603', 'sz000568']
 
 PID_FILE = 'pricemon.pid'
