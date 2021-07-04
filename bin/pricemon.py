@@ -1,7 +1,7 @@
 import logging, sys
 from stockpi import PriceMon
 
-STOCK_LIST = ['sh600580']
+STOCK_LIST = ['sh600580', 'sh600316', 'sz002603', 'sz000568']
 
 def init_logging():
     logging.basicConfig(stream=sys.stdout,
