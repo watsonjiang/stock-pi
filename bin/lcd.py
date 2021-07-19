@@ -30,7 +30,7 @@ def print_char612_xy(x, y, c):
     px = x * 7
     py = y * 15
     b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
-              i2c_msg.write(0x00, [0x25, c, 0x00]))
+              i2c_msg.write(0x00, [0x25, ord(c), 0x00]))
 
 def print_char1212_xy(x, y, c):
     ''' x 0~7 y 0~3
