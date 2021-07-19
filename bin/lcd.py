@@ -38,4 +38,4 @@ for i in range(0, 30):
   x = i % 18
   y = i // 18
   print('move to ', x, y, 'write ', chr(0x30+i))
-  print_char612_xy(x, y, chr('A')+i)
+  print_char612_xy(x, y, 0x30+i)
