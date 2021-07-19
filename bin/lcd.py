@@ -29,7 +29,7 @@ def print_char612_xy(x, y, c):
     '''
     px = x * 7
     py = y * 15
-    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
+    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
               i2c_msg.write(0x00, [0x25, c, 0x00]))
 
 def print_char1212_xy(x, y, c):
@@ -38,23 +38,23 @@ def print_char1212_xy(x, y, c):
     px = x * 15
     py = y * 15
     data = [0x25] + c.encode('gb2312') + [0x00]
-    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
+    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
               i2c_msg.write(0x00, data))
 
-
-for i in range(0, 30):
+text="0123456789abcdefghijklmnopqrstuvwxyz"
+for n, i in enumerate(text):
   time.sleep(1)
-  x = i % 18
-  y = i // 18
-  print('move to ', x, y, 'write ', chr(0x30+i))
-  print_char612_xy(x, y, 0x30+i)
+  x = n % 18
+  y = n // 18
+  print('move to ', x, y, 'write ', i)
+  print_char612_xy(x, y, i)
 
 
 text = "中华人民共和国"
-for i in text:
+for n, i in enumerate(text):
   time.sleep(1)
-  x = i % 7
-  y = i // 7 + 2
+  x = n % 7
+  y = n // 7 + 2
   print('move to ', x, y, 'write ', i)
   print_char1212_xy(x, y, i)
 
