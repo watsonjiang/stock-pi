@@ -37,24 +37,46 @@ def print_char1212_xy(x, y, c):
     '''
     px = x * 15
     py = y * 15
-    data = [0x25] + c.encode('gb2312') + [0x00]
+    data = [0x27] + [i for i in c.encode('gb2312')] + [0x00]
+    print(px, py, data)
     b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
               i2c_msg.write(0x00, data))
 
-text="0123456789abcdefghijklmnopqrstuvwxyz"
+def print_char1616_xy(x, y, c):
+    ''' x 0~5 y 0~2
+    '''
+    px = x * 20
+    py = y * 20
+    data = [0x28] + [i for i in c.encode('gb2312')] + [0x00]
+    print(px, py, data)
+    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
+              i2c_msg.write(0x00, data))
+
+
+
+text="0123456789abcdefgh"
 for n, i in enumerate(text):
-  time.sleep(1)
+  time.sleep(0.3)
   x = n % 18
   y = n // 18
   print('move to ', x, y, 'write ', i)
   print_char612_xy(x, y, i)
 
 
-text = "中华人民共和国"
+text = "你好，蒋悦心"
 for n, i in enumerate(text):
-  time.sleep(1)
+  time.sleep(0.3)
   x = n % 7
-  y = n // 7 + 2
+  y = n // 7 + 1
   print('move to ', x, y, 'write ', i)
   print_char1212_xy(x, y, i)
+
+text = "你好，蒋大怪"
+for n, i in enumerate(text):
+  time.sleep(0.3)
+  x = n % 6
+  y = n // 6 + 2
+  print('move to ', x, y, 'write ', i)
+  print_char1616_xy(x, y, i)
+
 
