@@ -24,12 +24,8 @@ lcd.brightness(200)
 #text = "你好，蒋悦心"
 #lcd.print_str16_xy(0, 2, text)
 
-#走马灯
-text = "你好，蒋悦心"
-x = 0
+#时钟
 while True:
   time.sleep(1)
-  lcd.print_str16_pxy(x, 16, text)
-  x+=1
-  if x == 127:
-    x = 0
+  text = time.strftime("%Y-%m-%d %H:%M:%S", time.time())
+  lcd.print_str16_pxy(0, 16, text)
