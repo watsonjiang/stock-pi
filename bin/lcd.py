@@ -13,8 +13,6 @@ lcd.clear()
 time.sleep(1)
 lcd.brightness(200)
 
-
-
 text = "0123456789abcdefghijklmnopqrstuvwxyz"
 lcd.print_str8_xy(0, 0, text)
 
