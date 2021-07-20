@@ -43,7 +43,7 @@ class LCD:
         '''
         px = x * 6
         py = y * 8
-        data = [0x25] + [c for c in s.encode('gb2312')] + [0x00]
+        data = [0x24] + [c for c in s.encode('gb2312')] + [0x00]
         self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
                 i2c_msg.write(0x00, data))
 
