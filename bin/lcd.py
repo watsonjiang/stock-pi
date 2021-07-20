@@ -1,60 +1,25 @@
-from smbus2 import SMBus, i2c_msg
+#!/usr/bin/env python
+import sys
 import time
+sys.path.append('../src')
+from stockpi import LCD 
 
-b = SMBus(1)
-
-#print('reset')
-#b.write_byte(0x00, 0x01)
-#time.sleep(1)
+lcd = LCD()
 print('open lcd')
-b.write_byte(0x00, 0x11)
+lcd.switch_on()
 time.sleep(1)
 print('clear screen')
-b.write_byte(0x00, 0x10)
+lcd.clear()
 time.sleep(1)
-print('switch light ', 0xff)
-b.write_byte_data(0x00, 0x13, 0xff)
+lcd.brightness(200)
 
 
-def print_char57_xy(x, y, c):
-    ''' x 0~20 y 0~7
-    ''' 
-    px = x * 6
-    py = y * 8
-    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
-              i2c_msg.write(0x00, [0x24, c, 0x00]))
 
-def print_char612_xy(x, y, c):
-    ''' x 0~17  y 0~3
-    '''
-    px = x * 7
-    py = y * 15
-    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
-              i2c_msg.write(0x00, [0x25, ord(c), 0x00]))
-
-def print_char1212_xy(x, y, c):
-    ''' x 0~7 y 0~3
-    '''
-    px = x * 15
-    py = y * 15
-    data = [0x25] + c.encode('gb2312') + [0x00]
-    b.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
-              i2c_msg.write(0x00, data))
-
-text="0123456789abcdefghijklmnopqrstuvwxyz"
-for n, i in enumerate(text):
-  time.sleep(1)
-  x = n % 18
-  y = n // 18
-  print('move to ', x, y, 'write ', i)
-  print_char612_xy(x, y, i)
-
+text = "0123456789abcdefghijklmnopqrstuvwxyz"
+lcd.print_str8_xy(0, 0, text)
 
 text = "中华人民共和国"
-for n, i in enumerate(text):
-  time.sleep(1)
-  x = n % 7
-  y = n // 7 + 2
-  print('move to ', x, y, 'write ', i)
-  print_char1212_xy(x, y, i)
+lcd.print_char12_xy(0, 1, text)
 
+text = "你好，蒋悦心"
+lcd.print_char16_xy(0, 2, text)
