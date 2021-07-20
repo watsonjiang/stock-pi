@@ -10,14 +10,16 @@ lcd.switch_on()
 time.sleep(1)
 print('clear screen')
 lcd.clear()
-time.sleep(1)
 lcd.brightness(200)
 
+time.sleep(1)
 text = "0123456789abcdefghijklmnopqrstuvwxyz"
 lcd.print_str8_xy(0, 0, text)
 
+time.sleep(1)
 text = "中华人民共和国"
 lcd.print_char12_xy(0, 1, text)
 
+time.sleep(1)
 text = "你好，蒋悦心"
 lcd.print_char16_xy(0, 2, text)
