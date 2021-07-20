@@ -29,7 +29,7 @@ text = "你好，蒋悦心"
 x = 0
 while True:
   time.sleep(1)
-  lcd.print_str16_xy(x, 0, text)
+  lcd.print_str16_pxy(x, 16, text)
   x+=1
   if x == 127:
     x = 0

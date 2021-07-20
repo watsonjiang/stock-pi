@@ -38,7 +38,7 @@ class LCD:
 
 
     def print_str8_xy(self, x, y, s):
-        ''' 在x, y处显示5*7字符串s. 注意不能显示汉字
+        ''' 在x, y处显示8号字符串s. 注意不能显示汉字
             x 0~20 y 0~7
         '''
         px = x * 6
@@ -49,7 +49,7 @@ class LCD:
 
 
     def print_str12_xy(self, x, y, s):
-        '''在x,y处显示6*12字符串
+        '''在x,y处显示12号字符串
            x 0~17  y 0~3
         '''
         px = x * 7
@@ -60,11 +60,19 @@ class LCD:
 
 
     def print_str16_xy(self, x, y, s):
-        '''在x, y处显示12* 
+        '''在x, y处显示16号字符串
             x 0~7 y 0~3
         '''
         px = x * 15
         py = y * 15
+        data = [0x28] + [i for i in s.encode('gb2312')] + [0x00]
+        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
+                i2c_msg.write(0x00, data))
+
+    def print_str16_pxy(self, px, py, s):
+        '''在px, py处显示16号字符串
+            px 0~127 py 0~63
+        '''
         data = [0x28] + [i for i in s.encode('gb2312')] + [0x00]
         self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
                 i2c_msg.write(0x00, data))
