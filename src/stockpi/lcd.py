@@ -1,5 +1,4 @@
-from smbus2 import smbus, i2c_msg
-import time
+from smbus2 import SMBus, i2c_msg
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -10,7 +9,7 @@ class LCD:
     def __init__(self):
         '''初始化
         '''
-        self.lcd = smbus(1)
+        self.lcd = SMBus(1)
 
     def reset(self):
         '''产品复位
