@@ -10,7 +10,7 @@ lcd.switch_on()
 time.sleep(1)
 print('clear screen')
 lcd.clear()
-lcd.brightness(200)
+lcd.brightness(128)
 
 #time.sleep(1)
 #text = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -27,5 +27,7 @@ lcd.brightness(200)
 #时钟
 while True:
   time.sleep(1)
-  text = time.strftime("%Y-%m-%d %H:%M:%S", time.time())
-  lcd.print_str16_pxy(0, 16, text)
+  text = time.strftime("%Y-%m-%d", time.localtime())
+  lcd.print_str16_xy(2, 1, text)
+  text = time.strftime("%H:%M:%S", time.localtime())
+  lcd.print_str16_xy(2, 2, text)
