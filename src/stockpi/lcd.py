@@ -217,7 +217,6 @@ class LCDManager(object):
     def render_screen(self):
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
-        time.sleep(1)
         self.screen_stay_sec += 1
         if self.screen_stay_sec == 10:
             self.screen_idx = (self.screen_idx + 1) % len(self.screens)
