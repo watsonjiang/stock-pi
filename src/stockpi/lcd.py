@@ -209,6 +209,9 @@ class LCDManager(object):
         self.screen_idx = 0
         self.screen_stay_sec = 0
         self.lcd_device = LCD()
+        self.lcd_device.switch_on()
+        self.lcd_device.brightness(48)
+        self.lcd_device.clear()
         
 
     def render_screen(self):
@@ -218,7 +221,7 @@ class LCDManager(object):
         self.screen_stay_sec += 1
         if self.screen_stay_sec == 10:
             self.screen_idx = (self.screen_idx + 1) % len(self.screens)
-            self.lcd.clear()
+            self.lcd_device.clear()
             self.screen_stay_sec = 0
 
 def init(db_engine, stock_list):
