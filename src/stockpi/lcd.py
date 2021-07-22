@@ -175,7 +175,7 @@ class PriceScreen(IDispComponent):
         st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
         df = pd.read_sql_query(st, self.db_engine, parse_dates=['create_time', 'update_time'])
         df = df.set_index('create_time')
-        now = datetime.utcnow()
+        now = datetime.datetime.utcnow()
         start_time = now - datetime.timedelta(seconds=24*60*60)
         win = df['price'][start_time:now]
         if win.count() > 0:
@@ -187,7 +187,7 @@ class PriceScreen(IDispComponent):
         st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
         df = pd.read_sql_query(st, self.db_engine, parse_dates=['create_time', 'update_time'])
         df = df.set_index('create_time')
-        now = datetime.utcnow()
+        now = datetime.datetime.utcnow()
         start_time = now - datetime.timedelta(seconds=24*60*60)
         win = df['price'][start_time:now]
         if win.count() > 0:
