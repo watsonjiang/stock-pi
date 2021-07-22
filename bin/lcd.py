@@ -43,11 +43,16 @@ text_gen = lambda: '最低价格: 19.30'
 s2.add_component(TextBox(0, 48, text_gen, 16))
 screens.append(s2)
 
+screen_hold = 10 #每屏停留时间秒
 idx = 0
+screen_stay_cnt = 0
 while True:
   s = screens[idx]
   s.render(lcd)
   time.sleep(1)
-  idx = (idx + 1) % len(screens)
+  screen_stay_cnt += 1
+  if screen_stay_cnt == screen_hold:
+    idx = (idx + 1) % len(screens)
+    screen_stay_cnt = 0
 
       
