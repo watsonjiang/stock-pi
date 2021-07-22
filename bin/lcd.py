@@ -27,9 +27,9 @@ lcd.brightness(128)
 screens = []
 s1 = Screen()
 text_gen = lambda: time.strftime("%Y-%m-%d", time.localtime())
-s1.add_component(TextBox(30, 16, text_gen, 16))
+s1.add_component(TextBox(25, 16, text_gen, 16))
 text_gen = lambda: time.strftime("%H:%M:%S", time.localtime())
-s1.add_component(TextBox(30, 32, text_gen, 16))
+s1.add_component(TextBox(25, 32, text_gen, 16))
 screens.append(s1)
 
 s2 = Screen()
