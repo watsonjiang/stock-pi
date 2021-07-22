@@ -211,8 +211,6 @@ class LCDManager(object):
         self.screen_idx = 0
         self.screen_stay_sec = 0
         self.lcd = LCD()
-        
-        
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
