@@ -117,18 +117,17 @@ class TextBox(IDispComponent):
         elif self.fontSize == 16:
             lcd.print_str16_pxy(self.x, self.y, text)
 
-class Screen(object):
+class Screen(IDispComponent):
     '''显示组件容器
     '''
-    def __init__(self, lcd:LCD):
+    def __init__(self):
         self.components = []
-        self.lcd = lcd
 
     def add_component(self, c):
         self.components.append(c)
     
-    def rander(self):
+    def render(self, lcd:LCD):
         for c in self.components:
-            c.render(self.lcd)
+            c.render(lcd)
 
     

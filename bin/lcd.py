@@ -25,14 +25,14 @@ lcd.brightness(128)
 #lcd.print_str16_xy(0, 2, text)
 
 screens = []
-s1 = Screen(lcd)
+s1 = Screen()
 text_gen = lambda: time.strftime("%Y-%m-%d", time.localtime())
 s1.add_component(TextBox(33, 16, text_gen, 16))
 text_gen = lambda: time.strftime("%H:%M:%S", time.localtime())
 s1.add_component(TextBox(33, 32, text_gen, 16))
 screens.append(s1)
 
-s2 = Screen(lcd)
+s2 = Screen()
 text_gen = lambda: '卧龙电驱(sh000001)'
 s2.add_component(TextBox(0, 0, text_gen, 16))
 text_gen = lambda: '当前价格: 12.30'
@@ -46,7 +46,7 @@ screens.append(s2)
 idx = 0
 while True:
   s = screens[idx]
-  s.render()
+  s.render(lcd)
   time.sleep(1)
   idx = (idx + 1) % len(screens)
 
