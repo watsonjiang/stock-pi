@@ -105,7 +105,7 @@ class TextBox(IDispComponent):
         self.x = x
         self.y = y
         self.text_gen = text_gen
-        self.fontSize = 8
+        self.fontSize = fontSize
         
 
     def render(self, lcd:LCD):
