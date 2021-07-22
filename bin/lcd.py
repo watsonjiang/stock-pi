@@ -34,13 +34,13 @@ screens.append(s1)
 
 s2 = Screen()
 text_gen = lambda: '卧龙电驱(sh000001)'
-s2.add_component(TextBox(0, 0, text_gen, 16))
+s2.add_component(TextBox(0, 0, text_gen, fontSize=16))
 text_gen = lambda: '当前价格: 12.30'
-s2.add_component(TextBox(0, 16, text_gen, 16))
+s2.add_component(TextBox(0, 16, text_gen, fontSize=16))
 text_gen = lambda: '最高价格: 19.30'
-s2.add_component(TextBox(0, 32, text_gen, 16))
+s2.add_component(TextBox(0, 32, text_gen, fontSize=16))
 text_gen = lambda: '最低价格: 19.30'
-s2.add_component(TextBox(0, 48, text_gen, 16))
+s2.add_component(TextBox(0, 48, text_gen, fontSize=16))
 screens.append(s2)
 
 screen_hold = 10 #每屏停留时间秒
