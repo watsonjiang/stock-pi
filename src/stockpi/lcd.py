@@ -1,6 +1,15 @@
+import datetime
 from smbus2 import SMBus, i2c_msg
 import logging
 import abc
+import time
+import pandas as pd
+
+
+from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.sql.expression import select
+
+from stockpi.model import CompanyInfo, HqHistory
 
 LOGGER = logging.getLogger(__name__)
 
@@ -117,17 +126,103 @@ class TextBox(IDispComponent):
         elif self.fontSize == 16:
             lcd.print_str16_pxy(self.x, self.y, text)
 
-class Screen(IDispComponent):
-    '''显示组件容器
+class TimeScreen(IDispComponent):
+    '''时间屏
     '''
     def __init__(self):
-        self.components = []
+        self.components = [
+            TextBox(25, 16, self.get_date, 16),
+            TextBox(25, 32, self.get_time, 16)
+        ]
 
-    def add_component(self, c):
-        self.components.append(c)
+    def get_date(self):
+        return time.strftime("%Y-%m-%d", time.localtime())
+
+    def get_time(self):
+        return time.strftime("%H:%M:%S", time.localtime()) 
     
     def render(self, lcd:LCD):
         for c in self.components:
             c.render(lcd)
 
-    
+class PriceScreen(IDispComponent):
+    '''股票价格信息屏
+    '''
+    def __init__(self, db_engine, stock_no):
+        self.db_engine = db_engine
+        self.stock_no = stock_no        
+        self.components = [
+            TextBox(0, 0, self.get_title, 12),
+            TextBox(0, 16, self.get_price, 12),
+            TextBox(0, 32, self.get_high, 12),
+            TextBox(0, 48, self.get_low, 12),
+        ]
+        
+
+    def get_title(self):
+        with sessionmaker(self.db_engine)() as session:
+            company_info = session.query(CompanyInfo).filter(CompanyInfo.stock_no == self.stock_no).one_or_none()
+            return f'{company_info.name}({self.stock_no})' 
+
+    def get_price(self):
+        with sessionmaker(self.db_engine)() as session:
+            latest_price = session.query(HqHistory).filter(HqHistory.stock_no == self.stock_no).order_by(HqHistory.id.desc()).first()
+            if latest_price:
+               return latest_price.price       
+            return 0.0
+
+    def get_high(self):
+        st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
+        df = pd.read_sql_query(st, self.db_engine, parse_dates=['create_time', 'update_time'])
+        df = df.set_index('create_time')
+        now = datetime.utcnow()
+        start_time = now - datetime.timedelta(seconds=24*60*60)
+        win = df['price'][start_time:now]
+        if win.count() > 0:
+            return win.max()
+        else:
+            return 0.0
+
+    def get_low(self):
+        st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
+        df = pd.read_sql_query(st, self.db_engine, parse_dates=['create_time', 'update_time'])
+        df = df.set_index('create_time')
+        now = datetime.utcnow()
+        start_time = now - datetime.timedelta(seconds=24*60*60)
+        win = df['price'][start_time:now]
+        if win.count() > 0:
+            return win.min()
+        else:
+            return 0.0
+
+    def render(self, lcd:LCD):
+        for c in self.components:
+            c.render(lcd)
+
+
+class LCDManager(object):
+    def __init__(self, db_engine, stock_list):
+        screens = [
+            TimeScreen
+        ]
+        for stock_no in stock_list:
+            screens.append(PriceScreen(db_engine, stock_no))
+        self.screens = screens
+        self.screen_idx = 0
+        self.screen_stay_sec = 0
+        self.lcd = LCD()
+        
+        
+
+    def render_screen(self):
+        s = self.screens[self.screen_idx]
+        s.render(self.lcd)
+        time.sleep(1)
+        self.screen_stay_sec += 1
+        if self.screen_stay_sec == 10:
+            self.screen_idx = (self.screen_idx + 1) % len(self.screens)
+            self.lcd.clear()
+            self.screen_stay_sec = 0
+
+def init(db_engine, stock_list):
+    return LCDManager(db_engine, stock_list)
