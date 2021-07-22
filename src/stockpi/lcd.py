@@ -35,7 +35,7 @@ class LCD:
     def brightness(self, level):
         '''背光亮度 0~255
         '''
-        self.lcd.write_byte_data(0x00, 0x13, 0xff)
+        self.lcd.write_byte_data(0x00, 0x13, level)
 
 
     def print_str8_xy(self, x, y, s):
