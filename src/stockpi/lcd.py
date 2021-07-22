@@ -168,8 +168,8 @@ class PriceScreen(IDispComponent):
         with sessionmaker(self.db_engine)() as session:
             latest_price = session.query(HqHistory).filter(HqHistory.stock_no == self.stock_no).order_by(HqHistory.id.desc()).first()
             if latest_price:
-               return latest_price.price       
-            return 0.0
+               return '当前价格:{}'.format(latest_price.price)    
+            return '当前价格:{}'.format(0.0)
 
     def get_high(self):
         st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
@@ -179,9 +179,9 @@ class PriceScreen(IDispComponent):
         start_time = now - datetime.timedelta(seconds=24*60*60)
         win = df['price'][start_time:now]
         if win.count() > 0:
-            return win.max()
+            return '最高价格:{}'.format(win.max())
         else:
-            return 0.0
+            return '最高价格:{}'.format(0.0)
 
     def get_low(self):
         st = select(HqHistory).where(HqHistory.stock_no == self.stock_no)
@@ -191,9 +191,9 @@ class PriceScreen(IDispComponent):
         start_time = now - datetime.timedelta(seconds=24*60*60)
         win = df['price'][start_time:now]
         if win.count() > 0:
-            return win.min()
+            return '最低价格:{}'.format(win.min())
         else:
-            return 0.0
+            return '最低价格:{}'.format(0.0)
 
     def render(self, lcd):
         for c in self.components:
