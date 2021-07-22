@@ -2,7 +2,7 @@
 import sys
 import time
 sys.path.append('../src')
-from stockpi import LCD 
+from stockpi import LCD, Screen, TextBox 
 
 lcd = LCD()
 print('open lcd')
@@ -24,10 +24,30 @@ lcd.brightness(128)
 #text = "你好，蒋悦心"
 #lcd.print_str16_xy(0, 2, text)
 
-#时钟
+screens = []
+s1 = Screen(lcd)
+text_gen = lambda: time.strftime("%Y-%m-%d", time.localtime())
+s1.add_component(TextBox(33, 16, text_gen, 16))
+text_gen = lambda: time.strftime("%H:%M:%S", time.localtime())
+s1.add_component(TextBox(33, 32, text_gen, 16))
+screens.append(s1)
+
+s2 = Screen(lcd)
+text_gen = lambda: '卧龙电驱(sh000001)'
+s2.add_component(TextBox(0, 0, text_gen, 16))
+text_gen = lambda: '当前价格: 12.30'
+s2.add_component(TextBox(0, 16, text_gen, 16))
+text_gen = lambda: '最高价格: 19.30'
+s2.add_component(TextBox(0, 32, text_gen, 16))
+text_gen = lambda: '最低价格: 19.30'
+s2.add_component(TextBox(0, 48, text_gen, 16))
+screens.append(s2)
+
+idx = 0
 while True:
+  s = screens[idx]
+  s.render()
   time.sleep(1)
-  text = time.strftime("%Y-%m-%d", time.localtime())
-  lcd.print_str16_xy(2, 1, text)
-  text = time.strftime("%H:%M:%S", time.localtime())
-  lcd.print_str16_xy(2, 2, text)
+  idx = (idx + 1) % len(screens)
+
+      

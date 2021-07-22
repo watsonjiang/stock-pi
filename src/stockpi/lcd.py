@@ -1,5 +1,6 @@
 from smbus2 import SMBus, i2c_msg
 import logging
+import abc
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,8 +44,13 @@ class LCD:
         '''
         px = x * 6
         py = y * 8
+        self.print_str8_pxy(x, y, s)
+
+    def print_str8_pxy(self, x, y, s):
+        '''以px, py像素点为左上角，显示8号字符串
+        '''
         data = [0x24] + [c for c in s.encode('gb2312')] + [0x00]
-        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
+        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
 
 
@@ -54,8 +60,13 @@ class LCD:
         '''
         px = x * 7
         py = y * 15
+        self.print_str12_pxy(px, py, s)
+ 
+    def print_str12_pxy(self, x, y, s):
+        '''以px, py像素点为左上角，显示12号字符串
+        '''
         data = [0x27] + [c for c in s.encode('gb2312')] + [0x00]
-        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
+        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
 
 
@@ -65,15 +76,59 @@ class LCD:
         '''
         px = x * 15
         py = y * 15
-        data = [0x28] + [i for i in s.encode('gb2312')] + [0x00]
-        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
-                i2c_msg.write(0x00, data))
+        self.print_str16_pxy(px, py, s)
 
-    def print_str16_pxy(self, px, py, s):
+    def print_str16_pxy(self, x, y, s):
         '''在px, py处显示16号字符串
             px 0~127 py 0~63
         '''
         data = [0x28] + [i for i in s.encode('gb2312')] + [0x00]
-        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, px, py]),
+        self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
 
+class IDispComponent(abc.ABC):
+   '''显示组件
+   '''
+   @abc.abstractmethod
+   def render(self, lcd):
+       '''渲染组件
+       '''
+       raise NotImplementedError
+
+class TextBox(IDispComponent):
+    '''字符串组件
+    '''
+    def __init__(self, x, y, text_gen, fontSize=8):
+        '''以像素点x, y为左上角，显示字符组件
+           fontSize 8, 12, 16
+        '''
+        self.x = x
+        self.y = y
+        self.text_gen = text_gen
+        self.fontSize = 8
+        
+
+    def render(self, lcd:LCD):
+        text = self.text_gen()
+        if self.fontSize == 8:
+            lcd.print_str8_pxy(self.x, self.y, text)
+        elif self.fontSize == 12:
+            lcd.print_str12_pxy(self.x, self.y, text)
+        elif self.fontSize == 16:
+            lcd.print_str16_pxy(self.x, self.y, text)
+
+class Screen(object):
+    '''显示组件容器
+    '''
+    def __init__(self, lcd:LCD):
+        self.components = []
+        self.lcd = lcd
+
+    def add_component(self, c):
+        self.components.append(c)
+    
+    def rander(self):
+        for c in self.components:
+            c.render(self.lcd)
+
+    
