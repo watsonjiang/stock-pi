@@ -10,7 +10,7 @@ lcd.switch_on()
 time.sleep(1)
 print('clear screen')
 lcd.clear()
-lcd.brightness(0)
+lcd.brightness(48)
 
 #time.sleep(1)
 #text = "0123456789abcdefghijklmnopqrstuvwxyz"
