@@ -213,7 +213,7 @@ class LCDManager(object):
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
-        print('----', type(s))
+        print('-------', self.screens)
         s.render(self.lcd_device)
         time.sleep(1)
         self.screen_stay_sec += 1
