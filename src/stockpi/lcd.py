@@ -141,7 +141,7 @@ class TimeScreen(IDispComponent):
     def get_time(self):
         return time.strftime("%H:%M:%S", time.localtime()) 
     
-    def render(self, lcd:LCD):
+    def render(self, lcd):
         for c in self.components:
             c.render(lcd)
 
@@ -195,7 +195,7 @@ class PriceScreen(IDispComponent):
         else:
             return 0.0
 
-    def render(self, lcd:LCD):
+    def render(self, lcd):
         for c in self.components:
             c.render(lcd)
 
@@ -204,9 +204,7 @@ class LCDManager(object):
     def __init__(self, db_engine, stock_list):
         screens = [
             TimeScreen
-        ]
-        for stock_no in stock_list:
-            screens.append(PriceScreen(db_engine, stock_no))
+        ] + [PriceScreen(db_engine, stock_no) for stock_no in stock_list]
         self.screens = screens
         self.screen_idx = 0
         self.screen_stay_sec = 0
