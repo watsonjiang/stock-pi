@@ -16,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 #价格信息结构
 TYPE_STOCK_PRICE_INFO = namedtuple('StockPrice', ['stock_no', 'name', 'price', 'update_time'])
 
-REQ_TIMEOUT_IN_SEC = 3
+REQ_TIMEOUT_IN_SEC = (1, 1)
 
 STOCK_NO_PATTEN = re.compile(r'.*hq_str_([a-z0-9]+).*')
 
