@@ -1,6 +1,7 @@
 # 股票行情
 import logging
 import requests
+from requests.adapters import HTTPAdapter
 import re
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -149,7 +150,9 @@ class SinaHq(IHq):
             LOGGER.error('stock list is empty!')
             return []
         url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
-        r = requests.get(url, timeout=REQ_TIMEOUT_IN_SEC)
+        s = requests.Session()
+        s.mount("http://hq.sinajs.cn", HTTPAdapter(max_retries=0)) 
+        r = s.get(url, timeout=REQ_TIMEOUT_IN_SEC)
         if not r.ok:
             LOGGER.warning("request failed. code:%s body:%s", r.status_code, r.text)
             return []
