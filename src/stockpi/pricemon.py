@@ -3,6 +3,7 @@
 
 import logging
 import time
+import asyncio
 
 from . import hq
 from . import model
@@ -20,15 +21,37 @@ class PriceMon(object):
         self.messenger = notify.init()
         self.hq = hq.init(self.db_engine, stock_list)
         self.an = analyzer.init(self.db_engine, stock_list, self.messenger)
-        self.lcd_mgr = lcd.init(self.db_engine, stock_list)
+        #self.lcd_mgr = lcd.init(self.db_engine, stock_list)
+
+    async def timer_task_check_hq(self):
+        ''' 每秒更新一次行情信息
+        '''
+        while True:
+            is_updated = await self.hq.update_hq()
+            if is_updated:
+                self.an.analyze()
+            await asyncio.sleep(1)
+
+    async def task_lcd_control(self):
+        pass
 
     def mon(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.messenger.main_loop())
+        loop.create_task(self.timer_task_check_hq())
+        loop.create_task(self.task_lcd_control())
         #主循环
-        while True:
-            try:
-                self.hq.update_hq()
-                self.an.analyze()
-                self.lcd_mgr.render_screen()
-            except:
-                LOGGER.exception("unexpected exception.")
-            time.sleep(1)
+        try:
+            loop.run_forever()
+        except:
+            LOGGER.exception("unexpected exception.")
+        finally:
+            loop.close()
+
+        #     try:
+        #         self.hq.update_hq()
+        #         self.an.analyze()
+        #         self.lcd_mgr.render_screen()
+        #     except:
+        #         LOGGER.exception("unexpected exception.")
+        #     time.sleep(1)

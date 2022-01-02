@@ -1,5 +1,6 @@
 import logging
 import abc
+import asyncio
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,16 +28,17 @@ class IMessenger(abc.ABC):
     '''messenger 基类
     '''
     @abc.abstractmethod
-    def send_msg(self, msg):
+    def submit_msg(self, msg):
         '''发送消息
         '''
         raise NotImplementedError
+
 
 class DummyMessenger(IMessenger):
     '''测试用消息发送
     '''
 
-    def send_msg(self, msg):
+    def submit_msg(self, msg):
         '''发送消息
         '''
-        LOGGER.info('send msg %s', msg)
+        LOGGER.info('submit msg %s', msg)

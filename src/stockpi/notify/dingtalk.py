@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from stockpi.notify import IMessenger
 import time
@@ -5,7 +6,8 @@ import urllib
 import hmac
 import base64
 import hashlib
-import requests
+import aiohttp
+import json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ class DingTalkRobot(IMessenger):
     def __init__(self, ak, sk):
         self.ak = ak
         self.sk = sk
+        
 
     def make_sign(self):
         timestamp = str(round(time.time() * 1000))
@@ -30,7 +33,17 @@ class DingTalkRobot(IMessenger):
         LOGGER.info('-----ts:%s sign:%s', timestamp, sign)
         return timestamp, sign
 
-    def send_msg(self, msg):
+    def submit_msg(self, msg):
+        '''提交文本消息
+        '''
+        self.msg_queue.put_nowait(msg)
+
+    async def main_loop(self):
+        while True:
+            msg = await self.msg_queue.get()
+            await self.send_msg(msg)
+
+    async def send_msg(self, msg):
         ''' 发送文本消息
         '''
         data = {
@@ -46,6 +59,10 @@ class DingTalkRobot(IMessenger):
         ts, sign = self.make_sign()
         url = "{}?access_token={}&timestamp={}&sign={}".format(
             DING_TALK_SEND_URL, self.ak, ts, sign)
-        LOGGER.info("------data:%s", data)
-        rsp = requests.post(url, json=data)
-        LOGGER.debug("-----rsp:%s", rsp.json())
+        body = json.dumps(data)
+        headers = {"Content-Type": "application/json"}
+        LOGGER.info("------send dingtalk requst. url:%s body:%s", url, body)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=body, headers=headers) as resp:
+                body = await resp.text()
+                LOGGER.debug("-----got response. status:%s body:%s", resp.status, body)

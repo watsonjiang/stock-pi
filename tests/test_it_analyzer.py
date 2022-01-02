@@ -1,16 +1,14 @@
 import unittest
 import logging
 import sys
-import json
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.schema import MetaData
 from stockpi import hq
-import time
-import datetime
 import sqlite3
 from stockpi import analyzer, model, notify
 from unittest.mock import MagicMock
+import asyncio
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,5 +39,6 @@ class ItPriceRushAnalyzer(unittest.TestCase):
             session.add(hq_hist)
             session.add(hq_hist1)
 
-        self.an.analyze()    
+        asyncio.get_event_loop().run_until_complete(self.an.analyze())
+        
         self.an.notice_rush.assert_called_once_with('sh600580', 10.0, 20.0)

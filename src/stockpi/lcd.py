@@ -4,6 +4,8 @@ import logging
 import abc
 import time
 import pandas as pd
+import asyncio
+import evdev
 
 
 from sqlalchemy.orm.session import sessionmaker
@@ -207,21 +209,49 @@ class LCDManager(object):
         ] + [PriceScreen(db_engine, stock_no) for stock_no in stock_list]
         self.screens = screens
         self.screen_idx = 0
-        self.screen_stay_sec = 0
+        self.lcd_brightness = 48
+        self.lcd_on = True
         self.lcd_device = LCD()
         self.lcd_device.switch_on()
-        self.lcd_device.brightness(48)
+        self.lcd_device.brightness(self.lcd_brightness)
         self.lcd_device.clear()
-        
+
+    def on_key_relase(self, keycode):
+        if keycode == evdev.ecodes.KEY_SCREEN:
+            self.lcd_on = not self.lcd_on
+            if self.lcd_on:
+                self.lcd_device.switch_on()
+            else:
+                self.lcd_device.switch_off() 
+        elif keycode == evdev.ecodes.KEY_VOLUMEUP:
+            self.lcd_brightness += 10
+            if self.lcd_brightness > 255:
+                self.lcd_brightness = 255
+            self.lcd_device.brightness(self.lcd_brightness)
+        elif keycode == evdev.ecodes.KEY_VOLUMEDOWN:
+            self.lcd_brightness -= 10
+            if self.lcd_brightness < 0:
+                self.lcd_brightness = 0
+            self.lcd_device.brightness(self.lcd_brightness)
+
+    async def control_loop(self):
+        dev = evdev.InputDevice('/dev/input/event0')
+        async for ev in dev.async_read_loop():
+            if ev.type == evdev.ecodes.EV_KEY:
+                key_ev = evdev.categorize(ev)
+                if key_ev.keystate == evdev.KeyEvent.key_up:
+                    self.on_key_relase(key_ev.keycode)
+
+    async def timer_loop(self):
+        while True:
+           await asyncio.sleep(10)
+           self.screen_idx = (self.screen_idx+1) % len(self.screens)
+           self.lcd_device.clear()
+           self.render_screen()
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
-        self.screen_stay_sec += 1
-        if self.screen_stay_sec == 10:
-            self.screen_idx = (self.screen_idx + 1) % len(self.screens)
-            self.lcd_device.clear()
-            self.screen_stay_sec = 0
 
 def init(db_engine, stock_list):
     return LCDManager(db_engine, stock_list)

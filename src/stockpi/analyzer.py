@@ -2,13 +2,11 @@
 import logging
 from collections import namedtuple
 from datetime import datetime, timedelta
-import time
 import abc
 import pandas as pd
 from sqlalchemy.orm.session import sessionmaker
 from stockpi.model import CompanyInfo, HqHistory
 from sqlalchemy.sql import select
-import math
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,27 +30,15 @@ class CompositeAnalyzer(IAnalyzer):
     '''综合分析
     '''
 
-    def __init__(self, analyzer_list, analyze_interval_in_sec=60):
+    def __init__(self, analyzer_list):
         self.analyzer_list = analyzer_list
-        self._analyze_interval_in_sec = analyze_interval_in_sec
-        self._last_analyze_time = 0
 
     def do_analyze(self):
         for an in self.analyzer_list:
             an.analyze()
 
-    def should_analyze(self):
-        '''是否分析
-        '''
-        now = time.time()
-        if now - self._last_analyze_time > self._analyze_interval_in_sec:
-            self._last_analyze_time = now
-            return True
-        return False
-
     def analyze(self):
-        if self.should_analyze():
-            self.do_analyze()
+        self.do_analyze()
 
 
 class PriceRushAnalyzer(IAnalyzer):

@@ -2,10 +2,11 @@ import time
 import hmac
 import base64
 import hashlib
-import urllib3 as urllib
 import logging
-import requests
+import aiohttp
+import asyncio
 from . import IMessenger
+import json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class FeishuRobot(IMessenger):
     def __init__(self, ak, sk):
         self.ak = ak
         self.sk = sk
+        self.msg_queue = asyncio.Queue()
 
     def make_sign(self):
         timestamp = round(time.time())
@@ -27,7 +29,17 @@ class FeishuRobot(IMessenger):
         LOGGER.info('-----ts:%s sign:%s', timestamp, sign)
         return timestamp, sign
 
-    def send_msg(self, msg):
+    def submit_msg(self, msg):
+        ''' 提交文本消息
+        '''
+        self.msg_queue.put_nowait(msg)
+
+    async def main_loop(self):
+        while True:
+            msg = await self.msg_queue.get()
+            await self.send_msg(msg)
+
+    async def send_msg(self, msg):
         ''' 发送文本消息
         '''
         ts, sign = self.make_sign()
@@ -40,6 +52,10 @@ class FeishuRobot(IMessenger):
             }
         }
         url = "{}/{}".format(FEISHU_HOOK_URL, self.ak)
-        LOGGER.info("------data:%s", data)
-        rsp = requests.post(url, json=data)
-        LOGGER.debug("-----rsp:%s", rsp.json()) 
+        headers = {"Content-Type": "application/json"}
+        body = json.dumps(data) 
+        LOGGER.info("------send feishu request. url:%s body:%s", url, body)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=body, headers=headers) as resp:
+                body = await resp.text()
+                LOGGER.debug("-----got response. status:%s body:%s", resp.status, body) 

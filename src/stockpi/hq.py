@@ -1,7 +1,7 @@
 # 股票行情
 import logging
-import requests
-from requests.adapters import HTTPAdapter
+import asyncio
+import aiohttp
 import re
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -53,22 +53,27 @@ class SinaHq(IHq):
             return True 
         return False
 
-    def do_update(self):
+    async def do_update(self):
         ''' 获取股票价格，存入存储
         '''
-        with self.session_maker.begin() as session:  
-            hq_list = self.get_price(self.stock_list)
-            for stock_no in hq_list.keys():
+        hq_list = await self.get_price(self.stock_list)
+
+        for stock_no in hq_list.keys():
+            with self.session_maker.begin() as session:  
                 hq_info = hq_list[stock_no]
                 self.update_company_info(session, hq_info) 
                 self.update_price_info(session, hq_info)
+
+        with self.session_maker.begin() as session:
             self.reclaim_resource(session)
 
-    def update_hq(self):
+    async def update_hq(self):
         ''' 检查是否需要更新，如果是，更新数据库
         '''
         if self.should_update_hq():
-            self.do_update()
+           await self.do_update()
+           return True
+        return False
 
     def update_company_info(self, db_session, hq_info):
         '''更新公司信息
@@ -141,7 +146,7 @@ class SinaHq(IHq):
             LOGGER.info('got price info %s - %s', stock_no, rst[stock_no]) 
         return rst
 
-    def get_price(self, stock_list):
+    async def get_price(self, stock_list):
         '''
         调用新浪股票行情接口，返回股票价格信息.
         @return
@@ -150,12 +155,13 @@ class SinaHq(IHq):
             LOGGER.error('stock list is empty!')
             return []
         url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
-        s = requests.Session()
-        s.mount("http://hq.sinajs.cn", HTTPAdapter(max_retries=0)) 
-        r = s.get(url, timeout=REQ_TIMEOUT_IN_SEC)
-        if not r.ok:
-            LOGGER.warning("request failed. code:%s body:%s", r.status_code, r.text)
-            return []
-        LOGGER.debug('request succeed. url:%s body:%s', url, r.text)
-        return self.parse_price(r.text)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as r:
+                body = await r.text()
+                if 200 != r.status:
+                    LOGGER.warning("request failed. code:%s body:%s", r.status, body)
+                    return []
+                else:
+                    LOGGER.debug('request succeed. url:%s body:%s', url, body) 
+                    return self.parse_price(body)
 

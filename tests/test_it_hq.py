@@ -1,7 +1,7 @@
 import unittest
 import logging
 import sys
-import json
+import asyncio
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.schema import MetaData
@@ -24,7 +24,8 @@ class ItSinaHq(unittest.TestCase):
         self.sina_hq = hq.SinaHq(self.db_engine, ['sh600580'])
 
     def test_get_price(self):
-        LOGGER.info('price info %s', self.sina_hq.get_price(['sh600580']))
+        rst = asyncio.get_event_loop().run_until_complete(self.sina_hq.get_price(['sh600580']))
+        LOGGER.info('price info %s', rst)
 
     def test_should_update_hq(self):
         '''测试信息拉取间隔, 10秒一次'''
