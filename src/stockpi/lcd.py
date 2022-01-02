@@ -225,7 +225,7 @@ class LCDManager(object):
         elif keycode == 'KEY_BACK':
             self.rotate_screen()
             self.render_screen()
-        elif keycode == 'KEY_PAUSE':
+        elif keycode == 'KEY_PLAYPAUSE':
             self.screen_auto_rotate = not self.screen_auto_rotate
         elif keycode == 'KEY_VOLUMEUP':
             self.lcd_brightness += 10
@@ -260,7 +260,7 @@ class LCDManager(object):
             count = (count + 1) % 10
 
     def render_screen(self):
-        self.lcd_device.clear()
+        #self.lcd_device.clear()
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
 
