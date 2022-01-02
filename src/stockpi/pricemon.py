@@ -45,11 +45,3 @@ class PriceMon(object):
             LOGGER.exception("unexpected exception.")
         finally:
             loop.close()
-
-        #     try:
-        #         self.hq.update_hq()
-        #         self.an.analyze()
-        #         self.lcd_mgr.render_screen()
-        #     except:
-        #         LOGGER.exception("unexpected exception.")
-        #     time.sleep(1)

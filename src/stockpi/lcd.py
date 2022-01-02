@@ -239,15 +239,16 @@ class LCDManager(object):
         async for ev in dev.async_read_loop():
             if ev.type == evdev.ecodes.EV_KEY:
                 key_ev = evdev.categorize(ev)
+                LOGGER.info("------got infra key event %s", key_ev)
                 if key_ev.keystate == evdev.KeyEvent.key_up:
                     self.on_key_relase(key_ev.keycode)
 
     async def timer_loop(self):
         while True:
-           await asyncio.sleep(10)
            self.screen_idx = (self.screen_idx+1) % len(self.screens)
            self.lcd_device.clear()
            self.render_screen()
+           await asyncio.sleep(10)
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
