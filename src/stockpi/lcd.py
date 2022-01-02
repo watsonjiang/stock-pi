@@ -217,6 +217,11 @@ class LCDManager(object):
         self.lcd_device.clear()
 
     def on_key_relase(self, keycode):
+        LOGGER.info("--------on_key_release key_code:%s scr:%s up:%s down:%s", 
+                    keycode, 
+                    evdev.ecodes.KEY_SCREEN,
+                    evdev.ecodes.KEY_VOLUMEUP,
+                    evdev.ecodes.KEY_VOLUMEDOWN)
         if keycode == evdev.ecodes.KEY_SCREEN:
             self.lcd_on = not self.lcd_on
             if self.lcd_on:
