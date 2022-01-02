@@ -209,6 +209,7 @@ class LCDManager(object):
         ] + [PriceScreen(db_engine, stock_no) for stock_no in stock_list]
         self.screens = screens
         self.screen_idx = 0
+        self.screen_stay_sec = 0
         self.screen_auto_rotate = True
         self.lcd_brightness = 48
         self.lcd_on = True
@@ -240,6 +241,7 @@ class LCDManager(object):
     
     def rotate_screen(self, step = 1):
         self.lcd_device.clear()
+        self.screen_stay_sec = 0
         self.screen_idx = (self.screen_idx+step) % len(self.screens)
 
     async def control_loop(self):
@@ -252,13 +254,12 @@ class LCDManager(object):
                     self.on_key_relase(key_ev.keycode)
 
     async def timer_loop(self):
-        count = 0
         while True:
-            if self.screen_auto_rotate and count % 10 == 9: 
+            if self.screen_auto_rotate and self.screen_stay_sec >= 10:
                 self.rotate_screen()
             self.render_screen()
             await asyncio.sleep(1)
-            count = (count + 1) % 10
+            self.screen_stay_sec += 1
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
