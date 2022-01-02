@@ -239,6 +239,7 @@ class LCDManager(object):
             self.lcd_device.brightness(self.lcd_brightness)
     
     def rotate_screen(self, step = 1):
+        self.lcd_device.clear()
         self.screen_idx = (self.screen_idx+step) % len(self.screens)
 
     async def control_loop(self):
@@ -260,7 +261,6 @@ class LCDManager(object):
             count = (count + 1) % 10
 
     def render_screen(self):
-        #self.lcd_device.clear()
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
 
