@@ -217,17 +217,12 @@ class LCDManager(object):
         self.lcd_device.clear()
 
     def on_key_relase(self, keycode):
-        LOGGER.info("--------on_key_release key_code:%s scr:%s up:%s down:%s", 
-                    keycode, 
-                    evdev.ecodes.KEY_SCREEN,
-                    evdev.ecodes.KEY_VOLUMEUP,
-                    evdev.ecodes.KEY_VOLUMEDOWN)
-        if keycode == 'KEY_SCREEN':
-            self.lcd_on = not self.lcd_on
-            if self.lcd_on:
-                self.lcd_device.switch_on()
-            else:
-                self.lcd_device.switch_off() 
+        if keycode == 'KEY_NEXT':
+           self.screen_idx = (self.screen_idx+1) % len(self.screens)
+           self.render_screen()
+        elif keycode == 'KEY_PREV':
+           self.screen_idx = (self.screen_idx-1) % len(self.screens)
+           self.render_screen()
         elif keycode == 'KEY_VOLUMEUP':
             self.lcd_brightness += 10
             if self.lcd_brightness > 255:
