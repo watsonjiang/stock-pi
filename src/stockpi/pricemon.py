@@ -21,7 +21,7 @@ class PriceMon(object):
         self.messenger = notify.init()
         self.hq = hq.init(self.db_engine, stock_list)
         self.an = analyzer.init(self.db_engine, stock_list, self.messenger)
-        #self.lcd_mgr = lcd.init(self.db_engine, stock_list)
+        self.lcd_mgr = lcd.init(self.db_engine, stock_list)
 
     async def timer_task_check_hq(self):
         ''' 每秒更新一次行情信息
@@ -32,14 +32,12 @@ class PriceMon(object):
                 self.an.analyze()
             await asyncio.sleep(1)
 
-    async def task_lcd_control(self):
-        pass
-
     def mon(self):
         loop = asyncio.get_event_loop()
         loop.create_task(self.messenger.main_loop())
         loop.create_task(self.timer_task_check_hq())
-        loop.create_task(self.task_lcd_control())
+        loop.create_task(self.lcd_mgr.timer_loop())
+        loop.create_task(self.lcd_mgr.control_loop())
         #主循环
         try:
             loop.run_forever()
