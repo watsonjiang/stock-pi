@@ -4,4 +4,5 @@
 
 # 运行
 > source venv/bin/activate
+> export PYTHONPATH=./
 > bin/pricemon.py restart
