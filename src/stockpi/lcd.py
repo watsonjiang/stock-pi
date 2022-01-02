@@ -218,10 +218,10 @@ class LCDManager(object):
 
     def on_key_relase(self, keycode):
         LOGGER.info("-----got keycode %s", keycode)
-        if keycode == 'KEY_NEXT':
+        if keycode == 'KEY_FORWARD':
            self.screen_idx = (self.screen_idx+1) % len(self.screens)
            self.render_screen()
-        elif keycode == 'KEY_PREV':
+        elif keycode == 'KEY_BACK':
            self.screen_idx = (self.screen_idx-1) % len(self.screens)
            self.render_screen()
         elif keycode == 'KEY_VOLUMEUP':
