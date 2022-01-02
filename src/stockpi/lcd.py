@@ -209,6 +209,7 @@ class LCDManager(object):
         ] + [PriceScreen(db_engine, stock_no) for stock_no in stock_list]
         self.screens = screens
         self.screen_idx = 0
+        self.screen_auto_rotate = True
         self.lcd_brightness = 48
         self.lcd_on = True
         self.lcd_device = LCD()
@@ -219,11 +220,13 @@ class LCDManager(object):
     def on_key_relase(self, keycode):
         LOGGER.info("-----got keycode %s", keycode)
         if keycode == 'KEY_FORWARD':
-           self.screen_idx = (self.screen_idx+1) % len(self.screens)
-           self.render_screen()
+            self.rotate_screen(-1)
+            self.render_screen()
         elif keycode == 'KEY_BACK':
-           self.screen_idx = (self.screen_idx-1) % len(self.screens)
-           self.render_screen()
+            self.rotate_screen()
+            self.render_screen()
+        elif keycode == 'KEY_PAUSE':
+            self.screen_auto_rotate = not self.screen_auto_rotate
         elif keycode == 'KEY_VOLUMEUP':
             self.lcd_brightness += 10
             if self.lcd_brightness > 255:
@@ -234,6 +237,9 @@ class LCDManager(object):
             if self.lcd_brightness < 0:
                 self.lcd_brightness = 0
             self.lcd_device.brightness(self.lcd_brightness)
+    
+    def rotate_screen(self, step = 1):
+        self.screen_idx = (self.screen_idx+step) % len(self.screens)
 
     async def control_loop(self):
         dev = evdev.InputDevice('/dev/input/event0')
@@ -245,10 +251,13 @@ class LCDManager(object):
                     self.on_key_relase(key_ev.keycode)
 
     async def timer_loop(self):
+        count = 0
         while True:
-           self.screen_idx = (self.screen_idx+1) % len(self.screens)
-           self.render_screen()
-           await asyncio.sleep(10)
+            if self.screen_auto_rotate and count % 10 == 9: 
+                self.rotate_screen()
+            self.render_screen()
+            await asyncio.sleep(1)
+            count = (count + 1) % 10
 
     def render_screen(self):
         self.lcd_device.clear()
