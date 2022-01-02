@@ -217,6 +217,7 @@ class LCDManager(object):
         self.lcd_device.clear()
 
     def on_key_relase(self, keycode):
+        LOGGER.info("-----got keycode %s", keycode)
         if keycode == 'KEY_NEXT':
            self.screen_idx = (self.screen_idx+1) % len(self.screens)
            self.render_screen()
@@ -246,11 +247,11 @@ class LCDManager(object):
     async def timer_loop(self):
         while True:
            self.screen_idx = (self.screen_idx+1) % len(self.screens)
-           self.lcd_device.clear()
            self.render_screen()
            await asyncio.sleep(10)
 
     def render_screen(self):
+        self.lcd_device.clear()
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
 
