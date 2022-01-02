@@ -222,18 +222,18 @@ class LCDManager(object):
                     evdev.ecodes.KEY_SCREEN,
                     evdev.ecodes.KEY_VOLUMEUP,
                     evdev.ecodes.KEY_VOLUMEDOWN)
-        if keycode == evdev.ecodes.KEY_SCREEN:
+        if keycode == 'KEY_SCREEN':
             self.lcd_on = not self.lcd_on
             if self.lcd_on:
                 self.lcd_device.switch_on()
             else:
                 self.lcd_device.switch_off() 
-        elif keycode == evdev.ecodes.KEY_VOLUMEUP:
+        elif keycode == 'KEY_VOLUMEUP':
             self.lcd_brightness += 10
             if self.lcd_brightness > 255:
                 self.lcd_brightness = 255
             self.lcd_device.brightness(self.lcd_brightness)
-        elif keycode == evdev.ecodes.KEY_VOLUMEDOWN:
+        elif keycode == 'KEY_VOLUMEDOWN':
             self.lcd_brightness -= 10
             if self.lcd_brightness < 0:
                 self.lcd_brightness = 0
