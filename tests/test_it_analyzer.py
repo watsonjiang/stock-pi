@@ -39,6 +39,6 @@ class ItPriceRushAnalyzer(unittest.TestCase):
             session.add(hq_hist)
             session.add(hq_hist1)
 
-        asyncio.get_event_loop().run_until_complete(self.an.analyze())
+        self.an.analyze()
         
         self.an.notice_rush.assert_called_once_with('sh600580', 10.0, 20.0)

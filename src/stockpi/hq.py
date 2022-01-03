@@ -58,11 +58,11 @@ class SinaHq(IHq):
         '''
         hq_list = await self.get_price(self.stock_list)
 
-        for stock_no in hq_list.keys():
-            with self.session_maker.begin() as session:  
-                hq_info = hq_list[stock_no]
-                self.update_company_info(session, hq_info) 
-                self.update_price_info(session, hq_info)
+        for hq_info in hq_list.values():
+            if float(hq_info.price) > 0: #过滤开盘前准备数据
+                with self.session_maker.begin() as session:  
+                    self.update_company_info(session, hq_info) 
+                    self.update_price_info(session, hq_info)
 
         with self.session_maker.begin() as session:
             self.reclaim_resource(session)
