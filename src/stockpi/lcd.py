@@ -244,7 +244,7 @@ class LCDManager(object):
         self.screen_stay_sec = 0
         self.screen_idx = (self.screen_idx+step) % len(self.screens)
 
-    async def control_loop(self):
+    async def screen_control_loop(self):
         dev = evdev.InputDevice('/dev/input/event0')
         async for ev in dev.async_read_loop():
             if ev.type == evdev.ecodes.EV_KEY:
@@ -253,7 +253,7 @@ class LCDManager(object):
                 if key_ev.keystate == evdev.KeyEvent.key_up:
                     self.on_key_relase(key_ev.keycode)
 
-    async def timer_loop(self):
+    async def screen_timer_loop(self):
         while True:
             if self.screen_auto_rotate and self.screen_stay_sec >= 10:
                 self.rotate_screen()

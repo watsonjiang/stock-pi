@@ -27,17 +27,21 @@ class PriceMon(object):
         ''' 每秒更新一次行情信息
         '''
         while True:
-            is_updated = await self.hq.update_hq()
-            if is_updated:
-                self.an.analyze()
-            await asyncio.sleep(1)
+            try:
+                is_updated = await self.hq.update_hq()
+                if is_updated:
+                    self.an.analyze()
+                await asyncio.sleep(1)
+            except:
+                #ignore all exception.
+                LOGGER.error("unexpected exception.")
 
     def mon(self):
         loop = asyncio.get_event_loop()
         loop.create_task(self.messenger.main_loop())
         loop.create_task(self.timer_task_check_hq())
-        loop.create_task(self.lcd_mgr.timer_loop())
-        loop.create_task(self.lcd_mgr.control_loop())
+        loop.create_task(self.lcd_mgr.screen_timer_loop())
+        loop.create_task(self.lcd_mgr.screen_control_loop())
         #主循环
         try:
             loop.run_forever()
