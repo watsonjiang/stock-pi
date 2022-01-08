@@ -34,7 +34,7 @@ class PriceMon(object):
                 await asyncio.sleep(1)
             except:
                 #ignore all exception.
-                LOGGER.error("unexpected exception.")
+                LOGGER.exception("unexpected exception.")
 
     def mon(self):
         loop = asyncio.get_event_loop()

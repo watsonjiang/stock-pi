@@ -251,15 +251,22 @@ class LCDManager(object):
                 key_ev = evdev.categorize(ev)
                 LOGGER.info("------got infra key event %s", key_ev)
                 if key_ev.keystate == evdev.KeyEvent.key_up:
-                    self.on_key_relase(key_ev.keycode)
+                    try:
+                        self.on_key_relase(key_ev.keycode)
+                    except:
+                        LOGGER.exception("unexpected exception.")
 
     async def screen_timer_loop(self):
         while True:
-            if self.screen_auto_rotate and self.screen_stay_sec >= 10:
-                self.rotate_screen()
-            self.render_screen()
-            await asyncio.sleep(1)
-            self.screen_stay_sec += 1
+            try:
+                if self.screen_auto_rotate and self.screen_stay_sec >= 10:
+                    self.rotate_screen()
+                self.render_screen()
+                await asyncio.sleep(1)
+                self.screen_stay_sec += 1
+            except:
+                # ignore all exception.
+                LOGGER.exception("unexpected exception.")
 
     def render_screen(self):
         s = self.screens[self.screen_idx]
