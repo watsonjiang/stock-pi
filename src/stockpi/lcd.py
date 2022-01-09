@@ -262,12 +262,12 @@ class LCDManager(object):
                 if self.screen_auto_rotate and self.screen_stay_sec >= 10:
                     self.rotate_screen()
                 self.render_screen()
-                await asyncio.sleep(1)
-                self.screen_stay_sec += 1
             except:
                 # ignore all exception.
                 LOGGER.exception("unexpected exception.")
-
+            await asyncio.sleep(1)
+            self.screen_stay_sec += 1
+ 
     def render_screen(self):
         s = self.screens[self.screen_idx]
         s.render(self.lcd_device)
