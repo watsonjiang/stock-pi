@@ -23,31 +23,38 @@ class LCD:
         '''
         self.lcd = SMBus(1)
 
+    def sleep(self):
+        asyncio.sleep(0.100)
+
     def reset(self):
         '''产品复位
         '''
         self.lcd.write_byte(0x00, 0x01)
+        self.sleep()
 
     def clear(self):
         '''清屏
         '''
         self.lcd.write_byte(0x00, 0x10)
+        self.sleep()
 
     def switch_on(self):
         '''打开lcd
         '''
         self.lcd.write_byte(0x00, 0x11)
+        self.sleep()
 
     def switch_off(self):
         '''关闭lcd
         '''
         self.lcd.write_byte(0x00, 0x12)
+        self.sleep()
 
     def brightness(self, level):
         '''背光亮度 0~255
         '''
         self.lcd.write_byte_data(0x00, 0x13, level)
-
+        self.sleep()
 
     def print_str8_xy(self, x, y, s):
         ''' 在x, y处显示8号字符串s. 注意不能显示汉字
@@ -56,6 +63,7 @@ class LCD:
         px = x * 6
         py = y * 8
         self.print_str8_pxy(x, y, s)
+        self.sleep()
 
     def print_str8_pxy(self, x, y, s):
         '''以px, py像素点为左上角，显示8号字符串
@@ -63,6 +71,7 @@ class LCD:
         data = [0x24] + [c for c in s.encode('gb2312')] + [0x00]
         self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
+        self.sleep()
 
 
     def print_str12_xy(self, x, y, s):
@@ -72,6 +81,7 @@ class LCD:
         px = x * 7
         py = y * 15
         self.print_str12_pxy(px, py, s)
+        self.sleep()
  
     def print_str12_pxy(self, x, y, s):
         '''以px, py像素点为左上角，显示12号字符串
@@ -79,7 +89,7 @@ class LCD:
         data = [0x27] + [c for c in s.encode('gb2312')] + [0x00]
         self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
-
+        self.sleep()
 
     def print_str16_xy(self, x, y, s):
         '''在x, y处显示16号字符串
@@ -88,6 +98,7 @@ class LCD:
         px = x * 15
         py = y * 15
         self.print_str16_pxy(px, py, s)
+        self.sleep()
 
     def print_str16_pxy(self, x, y, s):
         '''在px, py处显示16号字符串
@@ -96,6 +107,7 @@ class LCD:
         data = [0x28] + [i for i in s.encode('gb2312')] + [0x00]
         self.lcd.i2c_rdwr(i2c_msg.write(0x00, [0x20, x, y]),
                 i2c_msg.write(0x00, data))
+        self.sleep()
 
 class IDispComponent(abc.ABC):
    '''显示组件
