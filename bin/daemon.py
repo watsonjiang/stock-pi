@@ -8,25 +8,22 @@ import sys
 
 from setproctitle import setproctitle
 
+from stockpi.app import app_init_logging, app_main
+
 sys.path.append('../src')
 from stockpi import Daemon
 
 PID_FILE = '/var/run/stock-pi/pi-daemon.pid'
 
-STOCK_DB = 'sqlite+aiosqlite:///stock_pi.sqlite3'
-
-STOCK_LIST = ['sh600580']
-
 
 class PiDaemon(Daemon):
-    async def aio_main(self):
-        await hq_init(STOCK_LIST, )
 
     def run(self):
         setproctitle("pi-daemon")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        asyncio.run(self.aio_main)
+        app_init_logging(False)
+        asyncio.run(app_main())
 
 
 if __name__ == "__main__":
