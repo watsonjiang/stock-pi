@@ -4,6 +4,7 @@
 import asyncio
 import logging
 import sys
+from logging.handlers import TimedRotatingFileHandler
 
 from stockpi.anl import anl_init
 from stockpi.db import db_init, db_create_hq_subscriber
@@ -13,14 +14,16 @@ from stockpi.ntf import ntf_init
 LOGGER = logging.getLogger(__name__)
 
 
-def app_init_logging():
+def app_init_logging(log_to_console=False):
+    handlers = [TimedRotatingFileHandler('pi.log', when='D', backupCount=5)]
+    if log_to_console:
+        handlers.append(logging.StreamHandler(stream=sys.stdout))
     logging.basicConfig(level=logging.INFO,
-                        stream=sys.stdout,
-                        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+                        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                        handlers=handlers)
 
 
 async def app_init():
-    app_init_logging()
     asyncio.create_task(db_init())
     s = db_create_hq_subscriber()
     asyncio.create_task(hq_init(['sh600580'], s))
@@ -42,4 +45,5 @@ async def app_main():
 
 
 if __name__ == "__main__":
+    app_init_logging(True)
     asyncio.run(app_main())

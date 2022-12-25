@@ -8,12 +8,11 @@ import sys
 
 from setproctitle import setproctitle
 
-from stockpi.app import app_init_logging, app_main
-
 sys.path.append('../src')
 from stockpi import Daemon
+from stockpi.app import app_init_logging, app_main
 
-PID_FILE = '/var/run/stock-pi/pi-daemon.pid'
+PID_FILE = 'pi.pid'
 
 
 class PiDaemon(Daemon):
