@@ -1,19 +1,19 @@
-import datetime
-from smbus2 import SMBus, i2c_msg
-import logging
 import abc
-import time
-import pandas as pd
 import asyncio
+import datetime
+import logging
+import time
+
 import evdev
-
-
+import pandas as pd
+from smbus2 import SMBus, i2c_msg
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import select
 
-from stockpi.model import CompanyInfo, HqHistory
+from stockpi.db import CompanyInfo, HqHistory
 
 LOGGER = logging.getLogger(__name__)
+
 
 class LCD:
     '''RSCG12864B 功能封装

@@ -1,107 +1,60 @@
 # 股票行情
-import logging
+import abc
 import asyncio
-import aiohttp
+import logging
 import re
 from collections import namedtuple
-from datetime import datetime, timedelta
-import abc
-import time
-import json
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql.expression import delete
-from . import model
+from datetime import datetime
+
+import aiohttp
 
 LOGGER = logging.getLogger(__name__)
 
-#价格信息结构
+# 价格信息结构
 TYPE_STOCK_PRICE_INFO = namedtuple('StockPrice', ['stock_no', 'name', 'price', 'update_time'])
 
 REQ_TIMEOUT_IN_SEC = (1, 1)
 
 STOCK_NO_PATTEN = re.compile(r'.*hq_str_([a-z0-9]+).*')
 
-def init(db_engine, stock_list):
-    return SinaHq(db_engine, stock_list)
+HQ_UPDATE_INTERVAL_IN_SEC = 10
+
+
+async def hq_init(stock_list, subscriber):
+    hq = SinaHq(stock_list)
+    while True:  # 行情信息主循环.
+        await asyncio.sleep(HQ_UPDATE_INTERVAL_IN_SEC)
+        await hq.update_hq(subscriber)
+
 
 class IHq(abc.ABC):
     '''行情信息获取基类
     '''
+
     @abc.abstractmethod
-    def update_hq(self):
-        '''更新行情
+    def update_hq(self, subscriber):
+        '''获取行情信息并通知给subscriber
         '''
         raise NotImplementedError
 
+
 class SinaHq(IHq):
+    """新浪行情获取
+    """
+
     STOCK_HQ_INFO_PATTEN = re.compile(r'.*"(.*)";$')
-    '''新浪行情获取实现
-    '''
-    def __init__(self, db_engine, stock_list, hq_update_interval_in_sec = 10):
+
+    def __init__(self, stock_list):
         self.stock_list = stock_list
-        self.db_engine = db_engine
-        self.session_maker = sessionmaker(bind=db_engine)
-        self._last_update_hq_time = time.time()
-        self._hq_update_interval_in_sec = hq_update_interval_in_sec
 
-    def should_update_hq(self):
-        '''是否更新行情
-        '''
-        now = time.time()
-        if now - self._last_update_hq_time > self._hq_update_interval_in_sec:
-            self._last_update_hq_time = now
-            return True 
-        return False
-
-    async def do_update(self):
-        ''' 获取股票价格，存入存储
-        '''
+    async def update_hq(self, subscriber):
+        """ 获取股票价格, 通知给subscriber
+        """
         hq_list = await self.get_price(self.stock_list)
 
         for hq_info in hq_list.values():
-            if float(hq_info.price) > 0: #过滤开盘前准备数据
-                with self.session_maker.begin() as session:  
-                    self.update_company_info(session, hq_info) 
-                    self.update_price_info(session, hq_info)
-
-        with self.session_maker.begin() as session:
-            self.reclaim_resource(session)
-
-    async def update_hq(self):
-        ''' 检查是否需要更新，如果是，更新数据库
-        '''
-        if self.should_update_hq():
-           await self.do_update()
-           return True
-        return False
-
-    def update_company_info(self, db_session, hq_info):
-        '''更新公司信息
-        '''
-        company_info = db_session.query(model.CompanyInfo).filter(model.CompanyInfo.stock_no == hq_info.stock_no).one_or_none()
-        if company_info:
-            company_info.name = hq_info.name
-        else: 
-            company_info = model.CompanyInfo()
-            company_info.stock_no = hq_info.stock_no
-            company_info.name = hq_info.name
-            db_session.add(company_info)
-
-    def update_price_info(self, db_session, hq_info):
-        '''更新价格信息
-        '''
-        hq_hist = model.HqHistory()
-        hq_hist.stock_no = hq_info.stock_no
-        hq_hist.price = hq_info.price
-        db_session.add(hq_hist)
-
-    def reclaim_resource(self, db_session):
-        '''回收过期资源
-        '''
-        #删除过期行情历史
-        expire_time = datetime.utcnow() - timedelta(hours=24)
-        del_stat = delete(model.HqHistory).where(model.HqHistory.create_time < expire_time)
-        db_session.execute(del_stat) 
+            if subscriber:
+                await subscriber(hq_info)
 
     def match_stock_no(self, line):
         m = STOCK_NO_PATTEN.match(line)
@@ -120,9 +73,9 @@ class SinaHq(IHq):
         return datetime.strptime('{} {}'.format(date, time), '%Y-%m-%d %H:%M:%S')
 
     def parse_price(self, sina_price_text):
-        '''
+        """
         解析sina的响应数据
-        '''
+        """
         rst = {}
         lines = sina_price_text.split('\n')
         # line by line
@@ -147,21 +100,21 @@ class SinaHq(IHq):
         return rst
 
     async def get_price(self, stock_list):
-        '''
+        """
         调用新浪股票行情接口，返回股票价格信息.
         @return
-        '''
+        """
         if not stock_list:
             LOGGER.error('stock list is empty!')
             return []
         url = 'http://hq.sinajs.cn/list={}'.format(','.join(stock_list))
-        async with aiohttp.ClientSession() as session:
+        headers = {"Referer": "http://finance.sina.com.cn"}
+        async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url) as r:
                 body = await r.text()
                 if 200 != r.status:
                     LOGGER.warning("request failed. code:%s body:%s", r.status, body)
                     return []
                 else:
-                    LOGGER.debug('request succeed. url:%s body:%s', url, body) 
+                    LOGGER.debug('request succeed. url:%s body:%s', url, body)
                     return self.parse_price(body)
-

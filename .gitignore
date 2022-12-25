@@ -130,3 +130,5 @@ dmypy.json
 
 venv
 .vscode
+.idea
+*.sqlite3

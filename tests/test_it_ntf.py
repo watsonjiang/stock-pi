@@ -1,10 +1,10 @@
-import unittest
+import asyncio
 import logging
 import sys
-import asyncio
-from stockpi.notify.dingtalk import DingTalkRobot
-from stockpi.notify.feishu import FeishuRobot
+import unittest
 
+from stockpi.ntf.dingtalk import DingTalkRobot
+from stockpi.ntf.feishu import FeishuRobot
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,10 +42,4 @@ class ItFeishuNotify(unittest.TestCase):
         )
 
     def test_send_msg(self):
-        asyncio.get_event_loop().create_task(self.robot.main_loop())
-        self.robot.submit_msg('hello world')
-        asyncio.get_event_loop().run_until_complete(self.async_sleep(3))
-        asyncio.get_event_loop().stop()
-
-    async def async_sleep(self, seconds):
-        await asyncio.sleep(seconds)
+        asyncio.run(self.robot.submit_msg('hello world'))

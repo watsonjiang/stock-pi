@@ -1,16 +1,19 @@
-import time
-import hmac
+import asyncio
 import base64
 import hashlib
-import logging
-import aiohttp
-import asyncio
-from . import IMessenger
+import hmac
 import json
+import logging
+import time
+
+import aiohttp
+
+from . import IMessenger
 
 LOGGER = logging.getLogger(__name__)
 
 FEISHU_HOOK_URL = 'https://open.feishu.cn/open-apis/bot/v2/hook'
+
 
 class FeishuRobot(IMessenger):
     '''飞书机器人消息
@@ -29,19 +32,14 @@ class FeishuRobot(IMessenger):
         LOGGER.info('-----ts:%s sign:%s', timestamp, sign)
         return timestamp, sign
 
-    def submit_msg(self, msg):
-        ''' 提交文本消息
-        '''
-        self.msg_queue.put_nowait(msg)
-
-    async def main_loop(self):
-        while True:
-            msg = await self.msg_queue.get()
-            await self.send_msg(msg)
+    async def submit_msg(self, msg):
+        """ 提交文本消息
+        """
+        await self.send_msg(msg)
 
     async def send_msg(self, msg):
-        ''' 发送文本消息
-        '''
+        """ 发送文本消息
+        """
         ts, sign = self.make_sign()
         data = {
             'timestamp': str(ts),

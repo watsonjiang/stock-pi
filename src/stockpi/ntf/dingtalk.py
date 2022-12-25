@@ -1,21 +1,24 @@
-import asyncio
-import logging
-from stockpi.notify import IMessenger
-import time
-import urllib
-import hmac
 import base64
 import hashlib
-import aiohttp
+import hmac
 import json
+import logging
+import time
+import urllib
+
+import aiohttp
+
+from stockpi.ntf import IMessenger
 
 LOGGER = logging.getLogger(__name__)
 
 DING_TALK_SEND_URL = 'https://oapi.dingtalk.com/robot/send'
 
+
 class DingTalkRobot(IMessenger):
     '''钉钉机器人消息
     '''
+
     def __init__(self, ak, sk):
         self.ak = ak
         self.sk = sk
@@ -33,15 +36,10 @@ class DingTalkRobot(IMessenger):
         LOGGER.info('-----ts:%s sign:%s', timestamp, sign)
         return timestamp, sign
 
-    def submit_msg(self, msg):
+    async def submit_msg(self, msg):
         '''提交文本消息
         '''
-        self.msg_queue.put_nowait(msg)
-
-    async def main_loop(self):
-        while True:
-            msg = await self.msg_queue.get()
-            await self.send_msg(msg)
+        self.send_msg(msg)
 
     async def send_msg(self, msg):
         ''' 发送文本消息
