@@ -4,7 +4,7 @@ import asyncio
 import logging
 import re
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, time
 
 import aiohttp
 
@@ -24,7 +24,18 @@ async def hq_init(stock_list, subscriber):
     hq = SinaHq(stock_list)
     while True:  # 行情信息主循环.
         await asyncio.sleep(HQ_UPDATE_INTERVAL_IN_SEC)
-        await hq.update_hq(subscriber)
+        if _is_market_open(datetime.now()):
+            await hq.update_hq(subscriber)
+
+
+def _is_market_open(dt):
+    if 0 <= dt.weekday() < 5:
+        t = dt.time()
+        if time(hour=9, minute=30, second=0) < t < time(hour=12, minute=0, second=0):
+            return True
+        if time(hour=13, minute=30, second=0) < t < time(hour=15, minute=0, second=0):
+            return True
+    return False
 
 
 class IHq(abc.ABC):
