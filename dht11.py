@@ -1,9 +1,9 @@
 # 温度湿度传感器测试
 import asyncio
 import logging
+import time
 
 from RPi import GPIO
-import time
 
 # 使用GPIO17引脚驱动
 PIN = 17
@@ -74,7 +74,7 @@ def _unpack_dht_data(raw: list[int]):
 
 
 async def read_device():
-    GPIO.setup(PIN, GPIO.OUT, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输出模式, 上拉电阻模式
+    GPIO.setup(PIN, GPIO.OUT)  # 设置GPIO口为输出模式
     await _delay_in_us(10 * 1000)  # 延时10毫秒, 初始化
 
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
@@ -100,4 +100,5 @@ if __name__ == '__main__':
         asyncio.run(read_device())
     except Exception:
         logging.exception("unexpected exception.")
-        GPIO.cleanup()
+
+    GPIO.cleanup()
