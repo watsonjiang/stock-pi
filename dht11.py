@@ -10,8 +10,8 @@ PIN = 17
 GPIO.setmode(GPIO.BCM)  # 设置为BCM编号模式
 
 
-async def _delay_in_us(t):  # 微秒级延时函数
-    await asyncio.sleep(t / 1000000)
+async def _delay_in_ms(t):  # 毫秒级延时函数
+    await asyncio.sleep(t / 1000)
 
 
 def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
@@ -20,6 +20,7 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     """
     t_start = time.time()
     GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
+    # GPIO.wait_for_edge(pin, edge)
     t_cost_ms = (time.time() - t_start) * 1000
     if t_cost_ms > time_in_ms:
         raise TimeoutError('time cost(ms): {}'.format(t_cost_ms))
@@ -75,10 +76,10 @@ def _unpack_dht_data(raw: list[int]):
 
 async def read_device():
     GPIO.setup(PIN, GPIO.OUT)  # 设置GPIO口为输出模式
-    await _delay_in_us(10 * 1000)  # 延时10毫秒, 初始化
+    await _delay_in_ms(10)  # 延时1毫秒, 初始化
 
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
-    await _delay_in_us(18 * 1000)  # 延时,
+    await _delay_in_ms(20)  # 延时,
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
 
     GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
