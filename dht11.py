@@ -76,7 +76,9 @@ def _unpack_dht_data(raw: list[int]):
 
 async def read_device():
     GPIO.setup(PIN, GPIO.OUT)  # 设置GPIO口为输出模式
+    logging.info('-------1{}'.format(time.time()))
     await _delay_in_ms(10)  # 延时1毫秒, 初始化
+    logging.info('-------2{}'.format(time.time()))
 
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
     await _delay_in_ms(20)  # 延时,
