@@ -31,9 +31,9 @@ def _wait_for_dht_start():
     """
     等待dht数据回传开始信号.
     """
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)  # DHT开始响应
-    _wait_for_edge_in_time(PIN, GPIO.RISING, 1)
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)
+    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)  # DHT开始响应
+    _wait_for_edge_in_time(PIN, GPIO.RISING, 1000)
+    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)
 
 
 def _wait_for_dht_data():
