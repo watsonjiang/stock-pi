@@ -1,6 +1,5 @@
 # 温度湿度传感器测试
 import asyncio
-import logging
 import time
 
 from RPi import GPIO
@@ -98,6 +97,9 @@ async def read_device():
 
 
 if __name__ == '__main__':
+    import logging
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     try:
         asyncio.run(read_device())
     except Exception:
