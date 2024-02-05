@@ -78,12 +78,12 @@ def _unpack_dht_data(raw: list[int]):
 async def read_device():
     GPIO.setup(PIN, GPIO.OUT)  # 设置GPIO口为输出模式
     logging.info('-------1-HIGH-{}'.format(time.time()))
-    await _delay_in_ms(10)  # 保持高电平初始化
+    await _delay_in_ms(100)  # 保持高电平初始化
 
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
     logging.info('-------2-LOW-{}'.format(time.time()))
 
-    await _delay_in_ms(20)  # 延时,
+    await _delay_in_ms(25)  # 延时,
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
     logging.info('-------3-HIGH-{}'.format(time.time()))
 
