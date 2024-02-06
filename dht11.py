@@ -90,7 +90,8 @@ async def read_device():
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
     logging.info('-------3-HIGH-{}'.format(time.time()))
 
-    GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
+    # GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
+    GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
 
     _wait_for_dht_start()
 
