@@ -99,7 +99,7 @@ async def read_device():
     while time.monotonic() - timestamp < 0.25:
         if dhtval != GPIO.input(PIN):
             dhtval = not dhtval  # we toggled
-            transitions.append(time.monotonic())  # save the timestamp
+            transitions.append(dhtval)  # save the timestamp
 
     logging.info('------4-transitions:{}'.format(transitions))
     raise ValueError('oops!')
