@@ -20,10 +20,8 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     t_start = time.time()
     logging.info("------4-{}-{}".format(t_start, pin))
     # rst = GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
-    # rst = GPIO.wait_for_edge(pin, GPIO.BOTH, timeout=1000)
-    # logging.info('-----rst:{}'.format(rst))
-    for i in range(0, 100):
-        logging.info('--------{}:{}'.format(i, GPIO.input(pin)))
+    rst = GPIO.wait_for_edge(PIN, GPIO.BOTH)
+    logging.info('-----rst:{}'.format(rst))
 
     # GPIO.wait_for_edge(pin, edge)
     t_cost_ms = (time.time() - t_start) * 1000
