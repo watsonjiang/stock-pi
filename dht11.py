@@ -2,7 +2,7 @@
 import asyncio
 import time
 
-from RPi import GPIO
+import RPi.GPIO as GPIO
 
 # 使用GPIO17引脚驱动
 PIN = 17
