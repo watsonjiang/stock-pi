@@ -18,7 +18,7 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     边缘捕获.
     """
     t_start = time.time()
-    logging.info("------4-{}".format(t_start))
+    logging.info("------4-{}-{}".format(t_start, pin))
     # rst = GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
     # rst = GPIO.wait_for_edge(pin, GPIO.BOTH, timeout=1000)
     # logging.info('-----rst:{}'.format(rst))
