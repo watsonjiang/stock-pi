@@ -20,7 +20,7 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     t_start = time.time()
     logging.info("------4-{}".format(t_start))
     # rst = GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
-    rst = GPIO.wait_for_edge(pin, edge)
+    rst = GPIO.wait_for_edge(pin, GPIO.BOTH, timeout=1000)
     logging.info('-----rst:{}'.format(rst))
     # GPIO.wait_for_edge(pin, edge)
     t_cost_ms = (time.time() - t_start) * 1000
@@ -86,24 +86,12 @@ async def read_device():
 
     await _delay_in_ms(18)  # 延时,
 
-    timestamp = time.monotonic()
-    dhtval = True
-
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
     logging.info('-------3-HIGH-{}'.format(time.time()))
 
     GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
 
-    transitions = []
-
-    while time.monotonic() - timestamp < 0.25:
-        if dhtval != GPIO.input(PIN):
-            dhtval = not dhtval  # we toggled
-            transitions.append(dhtval)  # save the timestamp
-
-    logging.info('------4-transitions:{}'.format(transitions))
-    raise ValueError('oops!')
-    # _wait_for_dht_start()
+    _wait_for_dht_start()
 
     raw = []
     # data transmit start.
