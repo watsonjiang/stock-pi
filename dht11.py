@@ -5,8 +5,8 @@ import time
 from RPi import GPIO
 
 # 使用GPIO17引脚驱动
-PIN = 17
-GPIO.setmode(GPIO.BCM)  # 设置为BCM编号模式
+PIN = 11
+GPIO.setmode(GPIO.BOARD)  # 设置为BCM编号模式
 
 
 async def _delay_in_ms(t):  # 毫秒级延时函数
