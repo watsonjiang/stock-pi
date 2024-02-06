@@ -26,8 +26,11 @@ def _wait_for_dht_start():
     等待dht数据回传开始信号.
     """
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)  # DHT开始响应
+    logging.info("--------<4-LOW-{}".format(time.time()))
     _wait_for_edge_in_time(PIN, GPIO.RISING, 1000)
+    logging.info("--------<5-HIGH-{}".format(time.time()))
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)
+    logging.info("--------<6-LOW-{}".format(time.time()))
 
 
 def _wait_for_dht_data():
@@ -71,16 +74,16 @@ def _unpack_dht_data(raw: list[int]):
 
 async def read_device():
     GPIO.setup(PIN, GPIO.OUT)  # 设置GPIO口为输出模式
-    logging.info('-------1-HIGH-{}'.format(time.time()))
+    logging.info('------>1-HIGH-{}'.format(time.time()))
     await _delay_in_ms(100)  # 保持高电平初始化
 
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
-    logging.info('-------2-LOW-{}'.format(time.time()))
+    logging.info('------>2-LOW-{}'.format(time.time()))
 
     await _delay_in_ms(18)  # 延时,
 
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
-    logging.info('-------3-HIGH-{}'.format(time.time()))
+    logging.info('------>3-HIGH-{}'.format(time.time()))
 
     GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
     # 注意，不要设置pull_up_down属性，否则wait_for_edge函数会失效
