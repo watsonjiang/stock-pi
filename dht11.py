@@ -17,16 +17,8 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     """
     边缘捕获.
     """
-    t_start = time.time()
-    logging.info("------4-{}-{}".format(t_start, pin))
-    # rst = GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
-    rst = GPIO.wait_for_edge(PIN, GPIO.BOTH)
-    logging.info('-----rst:{}'.format(rst))
-
-    # GPIO.wait_for_edge(pin, edge)
-    t_cost_ms = (time.time() - t_start) * 1000
-    if t_cost_ms > time_in_ms:
-        raise TimeoutError('time cost(ms): {}'.format(t_cost_ms))
+    if not GPIO.wait_for_edge(pin, edge, timeout=time_in_ms):
+        raise TimeoutError('wait for edge timeout.')
 
 
 def _wait_for_dht_start():
@@ -90,8 +82,8 @@ async def read_device():
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
     logging.info('-------3-HIGH-{}'.format(time.time()))
 
-    # GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
-    GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据
+    GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
+    # 注意，不要设置pull_up_down属性，否则wait_for_edge函数会失效
 
     _wait_for_dht_start()
 
