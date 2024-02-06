@@ -91,6 +91,7 @@ async def read_device():
     # data transmit start.
     for _ in range(0, 40):  # 40bit in total
         raw.append(_wait_for_dht_data())
+        logging.info("-----raw:{}".format(raw))
 
     rh, temp = _unpack_dht_data(raw)
 
