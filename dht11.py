@@ -41,7 +41,7 @@ def _wait_for_dht_data():
     t_start = time.monotonic_ns()
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)
     t_cost = time.monotonic_ns() - t_start
-    if t_cost > 50:
+    if t_cost > 50000:
         return 1
     return 0
 
@@ -88,7 +88,8 @@ async def read_device():
     # data transmit start.
     for _ in range(0, 40):  # 40bit in total
         raw.append(_wait_for_dht_data())
-        logging.info("-----raw:{}".format(raw))
+
+    logging.info("-----raw:{}".format(raw))
 
     rh, temp = _unpack_dht_data(raw)
 
