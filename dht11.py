@@ -22,7 +22,7 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     while v == GPIO.input(pin):  # 忙等电平变化
         t_cost = (time.monotonic_ns() - t_start) / 1000000
         if t_cost > time_in_ms:
-            raise TimeoutError('wait for edge timeout. cost:{}'.format(t_cost))
+            raise TimeoutError('wait for edge timeout. cost in ms:{}'.format(t_cost))
 
 def _wait_for_dht_start():
     """
@@ -80,7 +80,8 @@ async def read_device():
     await _delay_in_ms(18)  # 延时,
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
 
-    GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
+    # GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
+    GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
     _wait_for_dht_start()
     logging.info('------>dht activated')
 
