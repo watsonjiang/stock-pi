@@ -23,14 +23,15 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
                          .format('RISING' if edge == GPIO.RISING else 'FALLING', v))
     t_start = time.monotonic_ns()
     while v == GPIO.input(pin):  # 忙等电平变化
-        if (time.monotonic_ns() - t_start) / 1000000 > time_in_ms:
-            raise TimeoutError('wait for edge timeout.')
+        t_cost = (time.monotonic_ns() - t_start) / 1000000
+        if t_cost > time_in_ms:
+            raise TimeoutError('wait for edge timeout. cost:{}'.format(t_cost))
 
 def _wait_for_dht_start():
     """
     等待dht数据回传开始信号.
     """
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)  # DHT开始响应
+    # _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)  # DHT开始响应
     logging.info("--------<4-LOW-{}".format(time.time()))
     _wait_for_edge_in_time(PIN, GPIO.RISING, 1)
     logging.info("--------<5-HIGH-{}".format(time.time()))
