@@ -19,7 +19,8 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     """
     v = GPIO.input(pin)
     if (v and edge == GPIO.RISING) or (not v and edge == GPIO.FALLING):
-        raise ValueError('edge is not possible for current state. state:{}'.format(v))
+        raise ValueError('edge {} is not possible for current state. state:{}'
+                         .format('RISING' if edge == GPIO.RISING else 'FALLING', v))
     t_start = time.monotonic_ns()
     while v == GPIO.input(pin):  # 忙等电平变化
         if (time.monotonic_ns() - t_start) / 1000000 > time_in_ms:
