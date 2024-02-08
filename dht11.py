@@ -43,7 +43,7 @@ def _wait_for_dht_data():
     while True:  # 忙等电平变化
         t = time.monotonic_ns()
         if t - t_start > 1000000000:  # 1s超时
-            raise TimeoutError('wait for dht data timeout.')
+            raise TimeoutError('wait for dht data timeout. rst:{}'.format(rst))
         if v != GPIO.input(PIN):
             v = not v
             rst.append((t, v))
@@ -89,10 +89,7 @@ async def read_device():
     _wait_for_dht_start()
     logging.info('------>dht activated')
 
-    try:
-        raw = _wait_for_dht_data()
-    except:
-        logging.exception('error')
+    raw = _wait_for_dht_data()
     logging.info("-----raw:{}".format(raw))
 
     # rh, temp = _unpack_dht_data(raw)
