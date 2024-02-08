@@ -17,10 +17,7 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     """
     边缘捕获.
     """
-    v = GPIO.input(pin)
-    if (v and edge == GPIO.RISING) or (not v and edge == GPIO.FALLING):
-        raise ValueError('edge {} is not possible for current state. state:{}'
-                         .format('RISING' if edge == GPIO.RISING else 'FALLING', v))
+    v = False if edge == GPIO.RISING else True  # 默认初始电平， 不做校验
     t_start = time.monotonic_ns()
     while v == GPIO.input(pin):  # 忙等电平变化
         t_cost = (time.monotonic_ns() - t_start) / 1000000
@@ -32,11 +29,8 @@ def _wait_for_dht_start():
     等待dht数据回传开始信号.
     """
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)  # DHT开始响应
-    logging.info("--------<4-LOW-{}".format(time.time()))
     _wait_for_edge_in_time(PIN, GPIO.RISING, 1)
-    logging.info("--------<5-HIGH-{}".format(time.time()))
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)
-    logging.info("--------<6-LOW-{}".format(time.time()))
 
 
 def _wait_for_dht_data():
@@ -82,19 +76,13 @@ async def read_device():
     GPIO.setup(PIN, GPIO.OUT, initial=GPIO.HIGH)  # 设置GPIO口为输出模式
     logging.info('------>1-HIGH-{}'.format(time.time()))
     await _delay_in_ms(100)  # 保持高电平初始化
-
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
-    logging.info('------>2-LOW-{}'.format(time.time()))
-
     await _delay_in_ms(18)  # 延时,
-
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
-    logging.info('------>3-HIGH-{}'.format(time.time()))
 
     GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
-
     _wait_for_dht_start()
-    logging.info('------>dht started')
+    logging.info('------>dht activated')
 
     raw = []
     # data transmit start.
