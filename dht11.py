@@ -89,7 +89,10 @@ async def read_device():
     _wait_for_dht_start()
     logging.info('------>dht activated')
 
-    raw = _wait_for_dht_data()
+    try:
+        raw = _wait_for_dht_data()
+    except:
+        logging.exception('error')
     logging.info("-----raw:{}".format(raw))
 
     # rh, temp = _unpack_dht_data(raw)
