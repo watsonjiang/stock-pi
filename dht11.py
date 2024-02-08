@@ -37,14 +37,18 @@ def _wait_for_dht_data():
     """
     等待dht回传数据.
     """
-    _wait_for_edge_in_time(PIN, GPIO.RISING, 100)
+    v = False
+    rst = []
     t_start = time.monotonic_ns()
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 100)
-    t_cost = time.monotonic_ns() - t_start
-    if t_cost > 50000:
-        return 1
-    return 0
-
+    while True:  # 忙等电平变化
+        t = time.monotonic_ns()
+        if t - t_start > 1000000000:  # 1s超时
+            raise TimeoutError('wait for dht data timeout.')
+        if v != GPIO.input(PIN):
+            v = not v
+            rst.append((t, v))
+            if len(rst) == 80:
+                return rst
 
 def _parse_int(data: list[int]):
     i = 0
@@ -85,18 +89,12 @@ async def read_device():
     _wait_for_dht_start()
     logging.info('------>dht activated')
 
-    raw = []
-    # data transmit start.
-    try:
-        for _ in range(0, 40):  # 40bit in total
-            raw.append(_wait_for_dht_data())
-    except:
-        logging.exception('wait for dht data error.')
+    raw = _wait_for_dht_data()
     logging.info("-----raw:{}".format(raw))
 
-    rh, temp = _unpack_dht_data(raw)
+    # rh, temp = _unpack_dht_data(raw)
 
-    logging.info('设备响应成功, 湿度:{}, 温度:{}'.format(rh, temp))
+    #logging.info('设备响应成功, 湿度:{}, 温度:{}'.format(rh, temp))
 
 
 if __name__ == '__main__':
