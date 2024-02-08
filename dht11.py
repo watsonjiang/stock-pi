@@ -17,21 +17,23 @@ def _wait_for_edge_in_time(pin: int, edge: int, time_in_ms: int):
     """
     边缘捕获.
     """
-    rst = GPIO.wait_for_edge(pin, edge, timeout=time_in_ms)
-    logging.info('---------rst:{}'.format(rst))
-    if not rst:
-        raise TimeoutError('wait for edge timeout.')
-
+    v = GPIO.input(pin)
+    if (v and edge == GPIO.RISING) or (not v and edge == GPIO.FALLING):
+        raise ValueError('edge is not possible for current state. state:{}'.format(v))
+    t_start = time.monotonic_ns()
+    while v == GPIO.input(pin):  # 忙等电平变化
+        if (time.monotonic_ns() - t_start) / 1000000 > time_in_ms:
+            raise TimeoutError('wait for edge timeout.')
 
 def _wait_for_dht_start():
     """
     等待dht数据回传开始信号.
     """
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)  # DHT开始响应
+    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)  # DHT开始响应
     logging.info("--------<4-LOW-{}".format(time.time()))
-    _wait_for_edge_in_time(PIN, GPIO.RISING, 1000)
+    _wait_for_edge_in_time(PIN, GPIO.RISING, 1)
     logging.info("--------<5-HIGH-{}".format(time.time()))
-    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1000)
+    _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)
     logging.info("--------<6-LOW-{}".format(time.time()))
 
 
@@ -40,10 +42,10 @@ def _wait_for_dht_data():
     等待dht回传数据.
     """
     _wait_for_edge_in_time(PIN, GPIO.RISING, 1)
-    t_time = time.time()
+    t_start = time.monotonic_ns()
     _wait_for_edge_in_time(PIN, GPIO.FALLING, 1)
-    t_cost_us = (time.time() - t_time) * 1000000
-    if t_cost_us > 50:
+    t_cost = time.monotonic_ns() - t_start
+    if t_cost > 50:
         return 1
     return 0
 
@@ -87,10 +89,10 @@ async def read_device():
     GPIO.output(PIN, GPIO.HIGH)  # 恢复高电平, 让DHT11检测到启动信号
     logging.info('------>3-HIGH-{}'.format(time.time()))
 
-    GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
-    # 注意，不要设置pull_up_down属性，否则wait_for_edge函数会失效
+    GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
 
     _wait_for_dht_start()
+    logging.info('------>dht started')
 
     raw = []
     # data transmit start.
