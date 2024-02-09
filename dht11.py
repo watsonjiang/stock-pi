@@ -64,9 +64,9 @@ def _unpack_dht_data(raw: list[int]):
     解码数据, 一共84个edge. 初始状态True
     """
     rst = []
-    for i in range(3, 82, 2):
-        logging.info('------i {}'.format(i))
-        t_cost = raw[i][0] - raw[i + 1][0]
+    for i in range(3, 83, 2):
+        t_cost = raw[i + 1][0] - raw[i][0]
+        logging.info('------i:{} cost:{}'.format(i, t_cost))
         if t_cost > 50:
             rst.append(1)
         else:
