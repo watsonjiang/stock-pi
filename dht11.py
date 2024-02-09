@@ -47,8 +47,8 @@ def _wait_for_dht_data():
         if v != GPIO.input(PIN):
             v = not v
             rst.append((t, v))
-            if len(rst) == 80:
-                return rst
+            # if len(rst) == 80:
+            #    return rst
 
 def _parse_int(data: list[int]):
     i = 0
