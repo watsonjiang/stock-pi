@@ -100,7 +100,7 @@ async def read_device():
     # logging.info('------>dht activated')
 
     raw = _wait_for_dht_data()
-    logging.info("-----raw:{}".format(raw))
+    logging.info("-----raw({}):{}".format(len(raw), raw))
 
     rh, temp = _unpack_dht_data(raw)
 
