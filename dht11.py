@@ -42,7 +42,7 @@ def _wait_for_dht_data():
     t_start = time.monotonic_ns()
     while True:  # 忙等电平变化
         t = time.monotonic_ns()
-        if t - t_start > 2000000000:  # 1s超时
+        if t - t_start > 1000000000:  # 1s超时
             raise TimeoutError('wait for dht data timeout. rst({}):{}'.format(len(rst), rst))
         if v != GPIO.input(PIN):
             v = not v
