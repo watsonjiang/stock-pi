@@ -37,7 +37,7 @@ def _wait_for_dht_data():
     """
     等待dht回传数据.
     """
-    v = False
+    v = True
     rst = []
     t_start = time.monotonic_ns()
     while True:  # 忙等电平变化
@@ -86,8 +86,8 @@ async def read_device():
 
     # GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
     GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
-    _wait_for_dht_start()
-    logging.info('------>dht activated')
+    # _wait_for_dht_start()
+    # logging.info('------>dht activated')
 
     raw = _wait_for_dht_data()
     logging.info("-----raw:{}".format(raw))
