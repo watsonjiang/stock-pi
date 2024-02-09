@@ -47,8 +47,8 @@ def _wait_for_dht_data():
         if v != GPIO.input(PIN):
             v = not v
             rst.append((t, v))
-            # if len(rst) == 80:
-            #    return rst
+            if len(rst) == 80:
+                return rst
 
 def _parse_int(data: list[int]):
     i = 0
@@ -61,13 +61,22 @@ def _parse_int(data: list[int]):
 
 def _unpack_dht_data(raw: list[int]):
     """
-    解码数据
+    解码数据, 一共84个edge. 初始状态True
     """
-    rh1 = _parse_int(raw[0:8])
-    rh2 = _parse_int(raw[8:16])
-    temp1 = _parse_int(raw[16:24])
-    temp2 = _parse_int(raw[24:32])
-    chk = _parse_int(raw[32:40])
+    rst = []
+    for i in range(3, 82, 2):
+        t_cost = raw[i][0] - raw[i + 1][0]
+        if t_cost > 50:
+            rst.append(1)
+        else:
+            rst.append(0)
+    logging.info("-------rst({}):{}".format(len(rst), rst))
+
+    rh1 = _parse_int(rst[0:8])
+    rh2 = _parse_int(rst[8:16])
+    temp1 = _parse_int(rst[16:24])
+    temp2 = _parse_int(rst[24:32])
+    chk = _parse_int(rst[32:40])
 
     s = (rh1 + rh2 + temp1 + temp2) % 256
     if s != chk:
@@ -92,9 +101,9 @@ async def read_device():
     raw = _wait_for_dht_data()
     logging.info("-----raw:{}".format(raw))
 
-    # rh, temp = _unpack_dht_data(raw)
+    rh, temp = _unpack_dht_data(raw)
 
-    #logging.info('设备响应成功, 湿度:{}, 温度:{}'.format(rh, temp))
+    logging.info('设备响应成功, 湿度:{}, 温度:{}'.format(rh, temp))
 
 
 if __name__ == '__main__':
