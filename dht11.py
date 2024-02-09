@@ -65,6 +65,7 @@ def _unpack_dht_data(raw: list[int]):
     """
     rst = []
     for i in range(3, 82, 2):
+        logging.info('------i {}'.format(i))
         t_cost = raw[i][0] - raw[i + 1][0]
         if t_cost > 50:
             rst.append(1)
