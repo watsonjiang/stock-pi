@@ -54,8 +54,9 @@ def _parse_int(data: list[int]):
     i = 0
     if len(data) != 8:
         raise ValueError('data size must be 8.')
-    for c in reversed(range(0, 8)):
-        i = i + data[c] * 2 ** c
+    for c in range(0, 8):
+        k = 2 ** (7 - c)
+        i = i + data[c] * k
     return i
 
 
