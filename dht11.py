@@ -75,8 +75,10 @@ def _unpack_dht_data(raw: list[int]):
 
     rh1 = _parse_int(rst[0:8])
     rh2 = _parse_int(rst[8:16])
+    logging.info("------rh1:{} rh2:{}".format(rh1, rh2))
     temp1 = _parse_int(rst[16:24])
     temp2 = _parse_int(rst[24:32])
+    logging.info("------temp1:{} temp2:{}".format(temp1, temp2))
     chk = _parse_int(rst[32:40])
 
     s = (rh1 + rh2 + temp1 + temp2) % 256
