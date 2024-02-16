@@ -8,7 +8,7 @@ import sys
 
 from setproctitle import setproctitle
 
-sys.path.append('..')
+sys.path.append('')
 from stockpi import Daemon
 from stockpi.app import app_init_logging, app_main
 
