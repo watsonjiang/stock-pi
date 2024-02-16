@@ -67,19 +67,15 @@ def _unpack_dht_data(raw: list[int]):
     rst = []
     for i in range(3, 83, 2):
         t_cost = raw[i + 1][0] - raw[i][0]
-        logging.info('------i:{} cost:{}'.format(i, t_cost))
         if t_cost > 50000:
             rst.append(1)
         else:
             rst.append(0)
-    logging.info("-------rst({}):{}".format(len(rst), rst))
 
     rh1 = _parse_int(rst[0:8])
     rh2 = _parse_int(rst[8:16])
-    logging.info("------rh1:{} rh2:{}".format(rh1, rh2))
     temp1 = _parse_int(rst[16:24])
     temp2 = _parse_int(rst[24:32])
-    logging.info("------temp1:{} temp2:{}".format(temp1, temp2))
     chk = _parse_int(rst[32:40])
 
     s = (rh1 + rh2 + temp1 + temp2) % 256
@@ -91,7 +87,6 @@ def _unpack_dht_data(raw: list[int]):
 
 async def read_device():
     GPIO.setup(PIN, GPIO.OUT, initial=GPIO.HIGH)  # 设置GPIO口为输出模式
-    logging.info('------>1-HIGH-{}'.format(time.time()))
     await _delay_in_ms(100)  # 保持高电平初始化
     GPIO.output(PIN, GPIO.LOW)  # 拉低电平
     await _delay_in_ms(18)  # 延时,
@@ -99,11 +94,8 @@ async def read_device():
 
     # GPIO.setup(PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
     GPIO.setup(PIN, GPIO.IN)  # 设置GPIO口为输入模式, 准备接收DHT11的数据,
-    # _wait_for_dht_start()
-    # logging.info('------>dht activated')
 
     raw = _wait_for_dht_data()
-    logging.info("-----raw({}):{}".format(len(raw), raw))
 
     rh, temp = _unpack_dht_data(raw)
 
